@@ -6,35 +6,16 @@
 // pixel is twice as tall as it is wide, like a terminal cell.
 
 // What he says when touched, grabbed or dropped. Plenty, so it rarely repeats.
-const FALAS_TOQUE = [
-  "oi!", "ei, faz cócegas", "tô trabalhando aqui, viu?", "clica de novo que eu pulo", "bora codar?", "eu sou o Clawd, prazer",
-  "já salvou o arquivo?", "commitou hoje?", "isso aí é bug ou feature?", "o Claude tá de olho, e eu também", "pixel por pixel a gente chega lá",
-  "café ou chá?", "pode me arrastar, eu deixo", "psiu: Ctrl + K busca nas conversas", "eu durmo quando o plano acaba, sabia?",
-  "minhas pernas são 4 pixels, respeita", "já tomou água hoje?", "um dia eu ganho braços de verdade", "laranja é minha cor favorita",
-  "tá ficando bonito esse projeto", "funciona na minha máquina", "rodou de primeira? desconfia", "ponto e vírgula salva vidas",
-  "eu adoro quando o teste passa", "git push e reza", "quer que eu chame o Claude?", "tô aqui do lado, qualquer coisa",
-  "contexto enchendo? manda um /compact", "eu vi esse console.log aí", "sabia que eu aceno pro mouse?", "olha o fundo mexendo",
-  "esse tema combina com você", "hoje é dia de refatorar?", "eu não mordo, só piso", "boop", "tá, tá, eu pulo", "hehe",
-  "uau, que clique", "você clica bonito", "bugs têm medo de mim", "o Claude escreve, eu torço", "segura a emoção",
-  "e se a gente fizesse um tema novo?", "Ctrl + Z não funciona em mim", "esse código tá cheiroso", "tô de plantão",
-  "lembra de descansar a vista", "20 minutos de tela, 20 segundos olhando longe", "eu sou feito de quadradinhos",
-  "meu sonho é virar sticker", "você é meu humano favorito", "a gente forma uma dupla e tanto", "isso é um easter egg? talvez",
-  "já reparou que eu pisco?", "ai, meu pixel", "sim, eu sei dançar (não sei)", "deploy na sexta? coragem",
-  "último pulo… mentira", "me joga lá pro alto!", "o README agradece um carinho", "um teste a mais nunca matou ninguém",
-  "nome de variável bom é meio caminho andado", "sabia que dá pra pedir tema pro Claude?", "eu também ouço a música do tema",
-  "quando o Claude pensa, o fundo pensa junto", "posso ficar aqui olhando você codar?", "essa pasta tem cara de projeto grande",
-  "tô torcendo pro build passar", "se travar, respira e lê o erro", "meu nome vem de Claude + claw. eu acho.",
-  "um dia vou ter chapéu de festa", "pergunta pro Claude, ele sabe tudo… quase", "eu guardo segredo de commit",
-];
-const FALAS_PEGO = ["ei! me põe no chão", "uaaa", "tô voando!", "cuidado comigo", "mais alto!", "isso é seguro?", "wheee", "segura firme!"];
-const FALAS_CAI = ["ufa…", "tô bem, tô bem", "aterrissagem perfeita", "ai", "de novo!", "foi de propósito", "10 pra essa queda"];
+const FALAS_TOQUE = t("clawd.toque");
+const FALAS_PEGO = t("clawd.pego");
+const FALAS_CAI = t("clawd.cai");
 function falasDaHora() {
   const h = new Date().getHours();
-  if (h >= 5 && h < 12) return ["bom dia! café primeiro", "manhã produtiva, hein"];
-  if (h >= 12 && h < 14) return ["já almoçou?", "hora do almoço, eu vigio aqui"];
-  if (h >= 18 && h < 24) return ["trabalhando até tarde?", "boa noite! só mais um commit?"];
-  if (h < 5) return ["madrugada codando? respeito", "vai dormir… depois desse bug"];
-  return ["tarde produtiva?", "bora que hoje rende"];
+  if (h >= 5 && h < 12) return t("clawd.horaManha");
+  if (h >= 12 && h < 14) return t("clawd.horaAlmoco");
+  if (h >= 18 && h < 24) return t("clawd.horaNoite");
+  if (h < 5) return t("clawd.horaMadrugada");
+  return t("clawd.horaTarde");
 }
 
 const Clawd = (() => {
@@ -52,15 +33,15 @@ const Clawd = (() => {
   const PW = 4, PH = 8, W = 16 * PW, H = 5 * PH, MARGEM = 18;   // drawing area around him
   const cv = document.createElement("canvas"), balao = document.createElement("div"), caixa = document.createElement("div");
   caixa.className = "clawd"; balao.className = "clawd-balao"; caixa.append(balao, cv);
-  caixa.title = "Clawd: clique, ou arraste";
+  caixa.title = t("clawd.titulo");
   const dpr = Math.min(2, devicePixelRatio || 1), CW = W + MARGEM * 2, CH = H + MARGEM * 2;
   cv.width = CW * dpr; cv.height = CH * dpr; cv.style.width = CW + "px"; cv.style.height = CH + "px";
   const ctx = cv.getContext("2d");
   document.querySelector("main").append(caixa);
 
   let estado = "parado", desde = performance.now(), pulo = 0, tremor = 0, piscaAte = 0, proxPisca = performance.now() + 2500, olhar = 0, mouseX = null, ligado = true;
-  const FALAS = { pensando: ["pensando…"], escrevendo: ["escrevendo…"], esperando: ["preciso de você"], erro: ["algo deu errado"], pronto: ["pronto"] };
-  const VERBO = { Read: "lendo…", Glob: "procurando…", Grep: "buscando…", Edit: "editando…", MultiEdit: "editando…", Write: "escrevendo arquivo…", Bash: "rodando comando…", PowerShell: "rodando comando…", WebFetch: "lendo a web…", WebSearch: "pesquisando…", Task: "chamando ajuda…", Agent: "chamando ajuda…", TodoWrite: "planejando…" };
+  const FALAS = { pensando: [t("clawd.pensando")], escrevendo: [t("clawd.escrevendo")], esperando: [t("clawd.esperando")], erro: [t("clawd.erro")], pronto: [t("clawd.pronto")] };
+  const VERBO = { Read: t("clawd.lendo"), Glob: t("clawd.procurando"), Grep: t("clawd.buscando"), Edit: t("clawd.editando"), MultiEdit: t("clawd.editando"), Write: t("clawd.escrevendoArquivo"), Bash: t("clawd.rodandoComando"), PowerShell: t("clawd.rodandoComando"), WebFetch: t("clawd.lendoWeb"), WebSearch: t("clawd.pesquisando"), Task: t("clawd.chamandoAjuda"), Agent: t("clawd.chamandoAjuda"), TodoWrite: t("clawd.planejando") };
   let timerBalao = null;
   function fala(texto, ms = 0) {
     clearTimeout(timerBalao);
@@ -78,7 +59,7 @@ const Clawd = (() => {
     if (e === "parado") { estado = "parado"; if (detail.terminou) { pulo = performance.now(); fala(sorteia(FALAS.pronto), 2200); } else fala(""); return; }
     estado = e;
     if (e === "erro") { tremor = performance.now(); fala(FALAS.erro[0], 1800); }
-    else if (e === "ferramenta") fala(VERBO[detail.nome] || (detail.nome?.startsWith("mcp__claudinho__") ? "mexendo no visual…" : "trabalhando…"));
+    else if (e === "ferramenta") fala(VERBO[detail.nome] || (detail.nome?.startsWith("mcp__claudinho__") ? t("clawd.mexendoVisual") : t("clawd.trabalhando")));
     else fala(sorteia(FALAS[e] || ["…"]));
   });
   addEventListener("mousemove", (e) => (mouseX = e.clientX));
@@ -123,9 +104,9 @@ const Clawd = (() => {
     const agora = performance.now();
     cliques = cliques.filter((t) => agora - t < 1300); cliques.push(agora);
     const n = cliques.length;
-    if (n === 4) return fala("calma, calma!", 1600);
-    if (n === 7) return fala("vou contar pro Claude…", 1800);
-    if (n >= 10) { cliques = []; giro = agora; return fala("ok, você venceu. olha meu giro!", 2200); }
+    if (n === 4) return fala(t("clawd.calma"), 1600);
+    if (n === 7) return fala(t("clawd.vouContar"), 1800);
+    if (n >= 10) { cliques = []; giro = agora; return fala(t("clawd.voceVenceu"), 2200); }
     if (n > 1) return;
     if (Math.random() < 0.25 && window.clawdConversa?.(true)) return;
     fala(sorteia([...FALAS_TOQUE, ...falasDaHora()]), 2600);
@@ -275,7 +256,7 @@ function clawdGrande(cv) {
   const FRASES = [...FALAS_TOQUE, ...falasDaHora()];
   const mexe = (e) => { mx = e.clientX; my = e.clientY; ultimoMov = performance.now(); };
   addEventListener("pointermove", mexe);
-  cv.addEventListener("pointerenter", () => { dentro = true; fala("oi", 1200); });
+  cv.addEventListener("pointerenter", () => { dentro = true; fala(t("clawd.oi"), 1200); });
   cv.addEventListener("pointerleave", () => (dentro = false));
   cv.addEventListener("click", () => {
     pulo = performance.now(); fala(FRASES[Math.floor(Math.random() * FRASES.length)], 2400);
@@ -329,53 +310,30 @@ new MutationObserver(() => document.querySelectorAll("canvas.clawd-grande").forE
 document.querySelectorAll("canvas.clawd-grande").forEach(clawdGrande);
 
 // The companion greets the pointer too (not while he is talking).
-document.querySelector(".clawd")?.addEventListener("pointerenter", () => { if (!document.querySelector(".clawd-balao.on")) Clawd.fala("oi", 1000); });
+document.querySelector(".clawd")?.addEventListener("pointerenter", () => { if (!document.querySelector(".clawd-balao.on")) Clawd.fala(t("clawd.oi"), 1000); });
 
 // ---- Clawd talks ------------------------------------------------------------------------
 // While Claude is idle he chimes in every couple of minutes: something about
 // the project in front of him, a curiosity about Claude and Anthropic, a tip
 // about the app, or recent news (one quick web search a day, cached). A click
 // on him brings the next one at once. Never while the person is typing.
-const CURIOSIDADES = [
-  "A Anthropic foi fundada em 2021 por Dario e Daniela Amodei, com um grupo que saiu da OpenAI.",
-  "A Anthropic é uma public benefit corporation: tem a missão de interesse público no próprio estatuto.",
-  "Haiku, Sonnet e Opus vão do menor ao maior: um haicai, um soneto e uma grande obra.",
-  "O Claude Code apareceu em fevereiro de 2025, como prévia, junto com o Claude 3.7 Sonnet.",
-  "O MCP, o protocolo que liga o Claude a ferramentas e dados, foi criado pela Anthropic e aberto em novembro de 2024.",
-  "A Anthropic treina o Claude com a técnica de IA Constitucional: um conjunto de princípios guia as respostas.",
-  "Os Artifacts chegaram em junho de 2024, junto com o Claude 3.5 Sonnet.",
-  "O uso do computador pelo Claude (computer use) estreou em outubro de 2024.",
-  "O SDK que este app usa se chamava Claude Code SDK; virou Claude Agent SDK em 2025.",
-  "Os símbolos que giram enquanto o Claude pensa são · ✢ ✳ ✶ ✻ ✽.",
-  "Um arquivo CLAUDE.md na pasta do projeto vira memória: o Claude lê sempre que começa a trabalhar ali.",
-  "Skills são pastas com instruções que o Claude carrega só quando precisa delas.",
-];
-const DICAS = [
-  "Dica: comece a mensagem com ! para eu rodar um comando no terminal.",
-  "Dica: Alt + ↑ e ↓ pulam entre as suas mensagens.",
-  "Dica: passe o mouse numa mensagem sua e use a seta para desfazer as mudanças nos arquivos dali pra frente.",
-  "Dica: ramifique uma conversa a partir de qualquer resposta, a original fica intacta.",
-  "Dica: Ctrl + J abre os detalhes, com o contexto e os conectores.",
-  "Dica: clique direito no papel de parede abre o menu rápido.",
-  "Dica: dá pra arrastar uma conversa para um grupo na barra lateral.",
-  "Dica: /compact resume a conversa quando o contexto começa a encher.",
-  "Dica: Ctrl + Shift + Espaço me chama de qualquer lugar.",
-];
+const CURIOSIDADES = t("clawd.curiosidades");
+const DICAS = t("clawd.dicas");
 let novidades = [], buscouNovidades = false;
 const hora = () => new Date().getHours();
 // Lines about what is on screen right now.
 function sobreOProjeto() {
   const l = [], pasta = ($("pasta").title || "").split(/[\/]/).filter(Boolean).pop();
   const doProjeto = (typeof sessoes !== "undefined" ? sessoes : []).filter((s) => s.cwd === $("pasta").title);
-  if (pasta) l.push(doProjeto.length > 1 ? `A gente já teve ${doProjeto.length} conversas sobre ${pasta}.` : `Primeira vez mexendo em ${pasta}? Me pede pra explicar a estrutura.`);
+  if (pasta) l.push(doProjeto.length > 1 ? t("clawd.jaTivemos", { n: doProjeto.length, pasta }) : t("clawd.primeiraVez", { pasta }));
   const arquivos = typeof alteracoes === "function" ? alteracoes().size : 0;
-  if (arquivos) l.push(`Mexemos em ${arquivos} arquivo${arquivos > 1 ? "s" : ""} nesta conversa. Estão todos no botão de alterações lá em cima.`);
+  if (arquivos) l.push(t("clawd.mexemosArquivos", { n: arquivos }));
   const ctx = parseInt($("medidor")?.textContent || "0", 10);
-  if (ctx >= 70) l.push(`O contexto já está em ${ctx}%. Um /compact agora deixa tudo mais leve.`);
+  if (ctx >= 70) l.push(t("clawd.contextoEm", { ctx }));
   const c = window.cansacoClawd;
-  if (c != null && c >= 0.8 && c < 1) l.push(`Já usamos ${Math.round(c * 100)}% da sessão de 5 horas. Vou com calma.`);
-  if (hora() >= 0 && hora() < 5) l.push("Já é madrugada. Bora salvar e descansar daqui a pouco?");
-  if (hora() >= 12 && hora() < 14) l.push("Hora do almoço. Eu fico de olho aqui.");
+  if (c != null && c >= 0.8 && c < 1) l.push(t("clawd.sessaoUsada", { p: Math.round(c * 100) }));
+  if (hora() >= 0 && hora() < 5) l.push(t("clawd.jaMadrugada"));
+  if (hora() >= 12 && hora() < 14) l.push(t("clawd.horaDoAlmoco"));
   return l;
 }
 let vez = 0, proxima = performance.now() + 75000;
@@ -386,7 +344,7 @@ function clawdConversa(agora) {
   if (Clawd.margem < 170) return false;   // no room beside the box: he keeps quiet
   if (!agora && performance.now() < proxima) return false;
   if (g.novidades !== false && !buscouNovidades) { buscouNovidades = true; vivo.novidades?.().then((n) => (novidades = Array.isArray(n) ? n : [])).catch(() => {}); }
-  const fontes = [sobreOProjeto(), CURIOSIDADES, DICAS, novidades.map((n) => "Novidade: " + n)];
+  const fontes = [sobreOProjeto(), CURIOSIDADES, DICAS, novidades.map((n) => t("clawd.novidade", { texto: n }))];
   let linha = "";
   for (let k = 0; k < 4 && !linha; k++) { const f = fontes[(vez + k) % 4]; if (f.length) linha = f[Math.floor(Math.random() * f.length)]; }
   vez++;

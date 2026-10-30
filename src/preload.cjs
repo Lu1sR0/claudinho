@@ -3,6 +3,8 @@
 const { contextBridge, ipcRenderer, webUtils } = require("electron");
 
 contextBridge.exposeInMainWorld("vivo", {
+  // read once, before any script draws a text (i18n/i18n.js)
+  idioma: ipcRenderer.sendSync("idioma"),
   estado: () => ipcRenderer.invoke("estado"),
   enviar: (texto, anexos) => ipcRenderer.invoke("enviar", texto, anexos),
   parar: () => ipcRenderer.invoke("parar"),

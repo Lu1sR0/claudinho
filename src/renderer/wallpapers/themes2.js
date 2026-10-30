@@ -49,7 +49,7 @@ function gato(g, t, h) {
 
 THEMES.push(
   {
-    id: "lareira", name: "Lareira", light: false,
+    id: "lareira", name: t("tema.lareira"), light: false,
     grid: "rgba(255,220,180,0.03)", accent: hx("#ffb066"), shadow: "rgba(0,0,0,0.3)", sprinkle: ["#ffe2a8"],
     fogo(env) { const { W, H, k } = env; return [W * 0.7, H * 0.84, k]; },
     bg(ctx, env) {
@@ -133,7 +133,7 @@ THEMES.push(
     },
   },
   {
-    id: "chuva", name: "Chuva Lo-fi", light: false,
+    id: "chuva", name: t("tema.chuva"), light: false,
     grid: "rgba(200,210,255,0.035)", accent: hx("#cfd8ff"), shadow: "rgba(0,0,0,0.25)",
     bg(ctx, env) {
       const { W, H, t } = env, raio = env.effects.find((f) => f.kind === "raio"), flash = raio ? Math.max(0, 1 - (t - raio.t) / 0.35) * (Math.sin((t - raio.t) * 60) > 0 ? 1 : 0.4) : 0;
@@ -209,7 +209,7 @@ THEMES.push(
     },
   },
   {
-    id: "galaxia", name: "Galáxia Distante", light: false,
+    id: "galaxia", name: t("tema.galaxia"), light: false,
     grid: "rgba(160,190,255,0.035)", accent: hx("#9fd4ff"), sprinkle: ["#ffffff", "#ff5a5a"], trailGlyph: "·*",
     salto(env) { const f = env.effects.find((e) => e.kind === "salto"); return f ? clamp((env.t - f.t) / f.life) : -1; },
     bg(ctx, env) {

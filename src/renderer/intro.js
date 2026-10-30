@@ -12,7 +12,7 @@ function boasVindas(aoAbrir) {
   try { primeira = !localStorage.getItem("jaAbriu"); localStorage.setItem("jaAbriu", "1"); } catch {}
   const r = primeira ? 1 : 0.62;                      // time scale
   const T = { campo: 0.5 * r, marca: 0.35 * r, nome: 0.8 * r, frase: 1.55 * r, revela: (primeira ? 2.75 : 1.7), fim: (primeira ? 3.55 : 2.4) };
-  const FRASE = "o Claude Code, mas agora com mais vida";
+  const FRASE = t("intro.frase");
   const FUNDO = "#171615", ACENTO = "#d97757";
   const RAMP = "8%XSSt%t;:";
   const fora = (t) => 1 - Math.pow(1 - t, 3);

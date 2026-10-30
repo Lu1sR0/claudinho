@@ -32,7 +32,7 @@ const ALIENS = [
 
 THEMES.push(
   {
-    id: "sakura", name: "Jardim Sakura", light: true,
+    id: "sakura", name: t("tema.sakura"), light: true,
     grid: "rgba(255,255,255,0.1)", accent: hx("#ff8fbf"), shadow: "rgba(150,60,90,0.1)", liftTo: [255, 240, 248],
     bg(ctx, { W, H, t, k }) {
       ctx.fillStyle = lin(ctx, 0, 0, 0, H, [[0, "#ffd3e3"], [0.55, "#ffeaf1"], [1, "#fff6f2"]]); ctx.fillRect(0, 0, W, H);
@@ -149,7 +149,7 @@ THEMES.push(
     },
   },
   {
-    id: "codigo", name: "Chuva de Código", light: false,
+    id: "codigo", name: t("tema.codigo"), light: false,
     grid: "rgba(80,255,140,0.035)", accent: hx("#5dff8a"), sprinkle: ["#ffffff"], trailGlyph: "01",
     bg(ctx, { W, H }) { ctx.fillStyle = lin(ctx, 0, 0, 0, H, [[0, "#000402"], [1, "#001208"]]); ctx.fillRect(0, 0, W, H); },
     ambient(env, glyph, R) {
