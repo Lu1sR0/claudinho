@@ -1,5 +1,7 @@
 # Claudinho
 
+🇧🇷 [Português](README.md) · 🇺🇸 [English](README.en.md) · 🇪🇸 [Español](README.es.md)
+
 O seu Claude Code, agora com mais vida. Um app de desktop que conversa com o **Claude Code** de verdade (pelo SDK oficial de agentes) e desenha a conversa sobre papéis de parede ASCII vivos, com o Clawd do seu lado: 15 temas animados com música e sons, 278 animações da biblioteca ASCII Magic, papéis de parede do Wallpaper Engine, vídeos, imagens e GIFs seus.
 
 Site: [meuclaudinho.com.br](https://meuclaudinho.com.br) · Feito por [Luis Roberto](https://luisrobertoportifolio.com)
@@ -30,7 +32,7 @@ npm run dist       # gera o instalador em dist/
 - **Biblioteca**: a aba Biblioteca do seletor tem 278 animações da [ASCII Magic](https://www.ascii-magic.com/ascii) (MIT), de 9 categorias: paisagens, cidades, cosmos, clima e natureza, animais, algoritmos, arcade, datas e mascotes (a lista fica em `tools/indice-magia.mjs`), com busca e categorias. `/fundo gato` abre a busca; o Claude também procura e aplica (*"põe um fundo de chuva"*).
 - **Meus**: crie no [ASCII Motion](https://www.ascii-motion.com), exporte como JSON e importe (botão, `/importar` ou arrastando o arquivo para a aba). Sessões `.asciimtn` sem camadas também entram.
 - **Anexos**: clipe no campo de mensagem, arrastar arquivos para a janela ou colar imagens (Ctrl+V). Imagens vão para o Claude; os outros arquivos ele abre pelo caminho.
-- **Comandos**: digite `/` para ver os comandos do app e os do Claude Code (skills, `/compact`, `/review`…). Setas escolhem, Tab completa, Enter executa.
+- **Comandos**: digite `/` para ver os comandos do app e os do Claude Code (skills, `/compact`, `/review`…). Setas escolhem, Tab completa, Enter executa. Os comandos do app também atendem pelo nome em inglês e espanhol (`/theme`, `/fondo`, `/background`, `/new`, `/nueva`, `/import`, `/customize`).
 - **Esforço**: a barrinha ao lado do modelo define quanto o Claude pensa (padrão a máximo). Permissões e modelo abrem um menu que explica cada opção.
 - **Conversas**: fixar no topo, duplicar, exportar em Markdown, renomear e apagar (menu ⋯). A busca (Ctrl+K) procura também dentro das mensagens.
 - **Respostas**: copiar, ler em voz alta e **ramificar daqui** (nova conversa a partir daquela resposta; a original fica intacta). Hora em cada mensagem.
@@ -46,7 +48,7 @@ npm run dist       # gera o instalador em dist/
 - **Desfazer**: passe o mouse numa mensagem sua e clique na seta: os arquivos que o Claude mudou a partir dali voltam ao que eram (com prévia antes).
 - **Perguntas do Claude** viram um formulário com as opções; **textos colados grandes** viram um anexo que dá pra abrir e editar; **título automático** para conversas novas; aviso e "continuar sozinho" quando o limite do plano estoura.
 - **Personalizar** (barra lateral ou `/personalizar`):
-  - **Geral**: enviar com Enter ou Ctrl+Enter, **desempenho** (Automático, Máximo ou Leve), mostrar raciocínio, título automático, Clawd, papel de parede que reage, notificações e a **conta** (login do Claude Code ou chave de API).
+  - **Geral**: **idioma** (português, inglês ou espanhol; começa no idioma do sistema), enviar com Enter ou Ctrl+Enter, **desempenho** (Automático, Máximo ou Leve), mostrar raciocínio, título automático, Clawd, papel de parede que reage, notificações e a **conta** (login do Claude Code ou chave de API).
   - **Fundo**: imagens, GIFs e vídeos seus como papel de parede (também arrastando para a aba Meus), e papéis de parede de vídeo e de página do **Wallpaper Engine** (os de cena só rodam dentro dele), com ajuste, escurecer, desfocar e som do vídeo.
   - **Cores**: paletas prontas, cor de destaque, do texto e do vidro, opacidade e desfoque do vidro, vidro claro ou escuro.
   - **Fontes**: fonte da interface e do código (da internet ou seus arquivos .ttf/.otf/.woff), tamanho do texto e largura da conversa.
@@ -70,10 +72,13 @@ npm run dist       # gera o instalador em dist/
 - `src/renderer/personalizar.js`: o painel Personalizar (cores, fontes, sons, música, ícone e nome).
 - `src/renderer/extras.js`, `clawd-arte.js`, `clawd.js`, `interface.js`, `os.js`: raciocínio, diffs, desfazer, perguntas, limites, o Clawd, o trilho de atividade, as janelinhas e o menu radial.
 - `src/renderer/simulador.js`: abre a interface num navegador comum com respostas de mentira, para mexer no visual sem o Claude Code.
+- `src/renderer/i18n/`: os textos da interface em português (`pt-BR.js`, o original), inglês (`en.js`) e espanhol (`es.js`); `i18n.js` traz o `t("chave")`, que cai no português quando falta uma tradução.
+  - Pra adicionar um idioma: copie `en.js` (ex.: `fr.js`) e traduza, ponha o `<script>` dele em `src/renderer/index.html` e o `import` em `src/main.js`, registre o nome em `IDIOMAS` e o prefixo em `idiomaDe()` (no `i18n.js`) e rode `node tools/confere-i18n.mjs`.
 
 ## Testes
 
 - `node tools/teste-sdk.mjs`: uma pergunta curta pelo SDK, para conferir o login e o streaming.
+- `node tools/confere-i18n.mjs`: confere se toda chave de tradução existe nos três idiomas.
 - `VIVO_LOG=1 VIVO_TESTE="mensagem" npm start`: envia a mensagem ao abrir e registra os eventos no terminal (`VIVO_ANEXO=arquivo` anexa um arquivo).
 - `node`/testes: com `VIVO_PASTA` ou `VIVO_JS` o app usa um perfil separado (`%APPDATA%\Claudinho-teste`), então os testes não mexem nas suas configurações e rodam com o app aberto.
 - `VIVO_MOTION=arquivo.json`: importa uma animação do ASCII Motion ao abrir. `VIVO_JS="expressão" VIVO_FOTO=tela.png`: roda um código na janela e salva uma foto dela.
