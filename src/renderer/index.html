@@ -18,42 +18,42 @@
   <aside class="side glass" id="side">
     <div class="side-topo">
       <span class="marca"><svg class="marca-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="5" rx="1.3"/><rect x="9.5" y="3" width="5" height="5" rx="1.3"/><rect class="acento" x="16" y="3" width="5" height="5" rx="1.3"/><rect x="3" y="9.5" width="5" height="5" rx="1.3"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.3"/><rect x="16" y="9.5" width="5" height="5" rx="1.3"/><rect x="3" y="16" width="5" height="5" rx="1.3"/><rect x="9.5" y="16" width="5" height="5" rx="1.3"/><rect x="16" y="16" width="5" height="5" rx="1.3"/></svg><span>Claudinho</span></span>
-      <button class="icone" id="recolher" title="Recolher barra (Ctrl+B)"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M9 4.5v15"/></svg></button>
+      <button class="icone" id="recolher" title="Recolher barra (Ctrl+B)" data-i18n-title="html.recolherBarra"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M9 4.5v15"/></svg></button>
     </div>
-    <button class="nova" id="nova"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Nova conversa</span><kbd>Ctrl N</kbd></button>
-    <div class="busca"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="busca" placeholder="Buscar conversas" /></div>
-    <div class="escopo" role="tablist" aria-label="Quais conversas">
-      <button data-todas="0" title="Só as conversas da pasta do projeto">Esta pasta</button>
-      <button data-todas="1" title="As conversas de todos os projetos do Claude Code (terminal, app do Claude, outras janelas)">Todas <small id="contaConversas"></small></button>
-      <button class="icone" id="sincronizar" title="Sincronizar agora (também atualiza sozinho)"><svg viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 0 1-13.1 5"/><path d="M4.5 12a7.5 7.5 0 0 1 13.1-5"/><path d="M17.6 3.5v3.6H14M6.4 20.5v-3.6H10"/></svg></button>
+    <button class="nova" id="nova"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="html.novaConversa">Nova conversa</span><kbd>Ctrl N</kbd></button>
+    <div class="busca"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="busca" placeholder="Buscar conversas" data-i18n-placeholder="html.buscarConversas" /></div>
+    <div class="escopo" role="tablist" aria-label="Quais conversas" data-i18n-aria-label="html.quaisConversas">
+      <button data-todas="0" title="Só as conversas da pasta do projeto" data-i18n-title="html.soDestaPasta" data-i18n="html.estaPasta">Esta pasta</button>
+      <button data-todas="1" title="As conversas de todos os projetos do Claude Code (terminal, app do Claude, outras janelas)" data-i18n-title="html.todasDica"><span data-i18n="html.todas">Todas</span> <small id="contaConversas"></small></button>
+      <button class="icone" id="sincronizar" title="Sincronizar agora (também atualiza sozinho)" data-i18n-title="html.sincronizar"><svg viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 0 1-13.1 5"/><path d="M4.5 12a7.5 7.5 0 0 1 13.1-5"/><path d="M17.6 3.5v3.6H14M6.4 20.5v-3.6H10"/></svg></button>
     </div>
-    <button class="projeto" id="pasta" title="Trocar a pasta do projeto">
+    <button class="projeto" id="pasta" title="Trocar a pasta do projeto" data-i18n-title="html.trocarPasta">
       <svg viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>
-      <span id="pastaNome">projeto</span>
+      <span id="pastaNome" data-i18n="html.projeto">projeto</span>
       <svg class="chev" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4"/></svg>
     </button>
     <div class="lista" id="lista"></div>
     <div class="side-base">
-      <button class="linha" id="temasBtn"><svg viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.8-1.7 0-1.2-1-1.6-1-2.6 0-1 .8-1.7 1.8-1.7H17a3.5 3.5 0 0 0 3.5-3.5c0-4.2-3.8-7.5-8.5-7.5z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/></svg><span>Temas</span><span class="valor" id="temaNome">Padrão</span></button>
-      <button class="linha" id="personalBtn"><svg viewBox="0 0 24 24"><path d="M4.5 19.5c1.5 0 3.5-.5 4.2-2.2.7-1.7-.2-3.3-1.7-3.3s-2.5 1.6-2.5 3c0 1-.5 2-1 2.5zM9.5 13l9-9.5a1.6 1.6 0 0 1 2.3 2.3L11.5 15"/></svg><span>Personalizar</span></button>
-      <button class="linha" id="creditosBtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M14.6 9.6a3.6 3.6 0 1 0 0 4.8"/></svg><span>Créditos</span></button>
+      <button class="linha" id="temasBtn"><svg viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.8-1.7 0-1.2-1-1.6-1-2.6 0-1 .8-1.7 1.8-1.7H17a3.5 3.5 0 0 0 3.5-3.5c0-4.2-3.8-7.5-8.5-7.5z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/></svg><span data-i18n="html.temas">Temas</span><span class="valor" id="temaNome" data-i18n="html.padrao">Padrão</span></button>
+      <button class="linha" id="personalBtn"><svg viewBox="0 0 24 24"><path d="M4.5 19.5c1.5 0 3.5-.5 4.2-2.2.7-1.7-.2-3.3-1.7-3.3s-2.5 1.6-2.5 3c0 1-.5 2-1 2.5zM9.5 13l9-9.5a1.6 1.6 0 0 1 2.3 2.3L11.5 15"/></svg><span data-i18n="html.personalizar">Personalizar</span></button>
+      <button class="linha" id="creditosBtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M14.6 9.6a3.6 3.6 0 1 0 0 4.8"/></svg><span data-i18n="html.creditos">Créditos</span></button>
     </div>
   </aside>
 
   <header class="top glass" id="top">
-    <button class="icone so-recolhido" id="expandir" title="Mostrar barra (Ctrl+B)"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M9 4.5v15"/></svg></button>
-    <span class="titulo" id="titulo">Nova conversa</span>
-    <button class="icone atalhos-btn" id="atalhosBtn" title="Atalhos (Ctrl+/)"><svg viewBox="0 0 24 24"><rect x="3" y="6.5" width="18" height="11" rx="2.5"/><path d="M7 10.5h.01M10.5 10.5h.01M14 10.5h.01M17 10.5h.01M8 14h8"/></svg></button>
+    <button class="icone so-recolhido" id="expandir" title="Mostrar barra (Ctrl+B)" data-i18n-title="html.mostrarBarra"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M9 4.5v15"/></svg></button>
+    <span class="titulo" id="titulo" data-i18n="html.novaConversa">Nova conversa</span>
+    <button class="icone atalhos-btn" id="atalhosBtn" title="Atalhos (Ctrl+/)" data-i18n-title="html.atalhos"><svg viewBox="0 0 24 24"><rect x="3" y="6.5" width="18" height="11" rx="2.5"/><path d="M7 10.5h.01M10.5 10.5h.01M14 10.5h.01M17 10.5h.01M8 14h8"/></svg></button>
     <div class="som" id="som">
-      <button class="icone" id="somBtn" title="Som do tema" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><path d="M4.5 9.5h3l4.5-4v13l-4.5-4h-3z"/><path class="onda" d="M15.5 9a4 4 0 0 1 0 6"/><path class="onda2" d="M18 6.5a7.5 7.5 0 0 1 0 11"/><path class="mudo" d="m16 9.5 5 5m0-5-5 5"/></svg></button>
-      <div class="som-pop" id="somPop" role="dialog" aria-label="Som do tema">
+      <button class="icone" id="somBtn" title="Som do tema" data-i18n-title="html.somDoTema" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><path d="M4.5 9.5h3l4.5-4v13l-4.5-4h-3z"/><path class="onda" d="M15.5 9a4 4 0 0 1 0 6"/><path class="onda2" d="M18 6.5a7.5 7.5 0 0 1 0 11"/><path class="mudo" d="m16 9.5 5 5m0-5-5 5"/></svg></button>
+      <div class="som-pop" id="somPop" role="dialog" aria-label="Som do tema" data-i18n-aria-label="html.somDoTema">
         <div class="som-linha">
           <span class="eq"><i></i><i></i><i></i><i></i></span>
-          <div class="som-txt"><b>Som do tema</b><small id="somDesc">Desligado</small></div>
-          <button class="chave" id="somChave" role="switch" aria-checked="false" title="Ligar ou desligar"><i></i></button>
+          <div class="som-txt"><b data-i18n="html.somDoTema">Som do tema</b><small id="somDesc" data-i18n="html.desligado">Desligado</small></div>
+          <button class="chave" id="somChave" role="switch" aria-checked="false" title="Ligar ou desligar" data-i18n-title="html.ligarOuDesligar"><i></i></button>
         </div>
-        <div class="som-musica" id="somMusica" hidden><button class="icone mus-tocar" title="Tocar ou pausar"></button><div class="som-txt"><b></b><small></small></div><button class="icone mus-prox" title="Próxima"><svg viewBox="0 0 24 24"><path d="M6 6v12l9-6zM17.5 6v12"/></svg></button></div>
-        <div class="som-vol"><svg viewBox="0 0 24 24"><path d="M4.5 9.5h3l4.5-4v13l-4.5-4h-3z"/></svg><input id="somVol" type="range" min="0" max="1" step="0.05" value="0.7" aria-label="Volume" /><span id="somPct">70%</span></div>
+        <div class="som-musica" id="somMusica" hidden><button class="icone mus-tocar" title="Tocar ou pausar" data-i18n-title="html.tocarOuPausar"></button><div class="som-txt"><b></b><small></small></div><button class="icone mus-prox" title="Próxima" data-i18n-title="html.proxima"><svg viewBox="0 0 24 24"><path d="M6 6v12l9-6zM17.5 6v12"/></svg></button></div>
+        <div class="som-vol"><svg viewBox="0 0 24 24"><path d="M4.5 9.5h3l4.5-4v13l-4.5-4h-3z"/></svg><input id="somVol" type="range" min="0" max="1" step="0.05" value="0.7" aria-label="Volume" data-i18n-aria-label="html.volume" /><span id="somPct">70%</span></div>
       </div>
     </div>
   </header>
@@ -61,30 +61,30 @@
   <main>
     <div class="banner glass" id="banner"></div>
     <div class="scroll" id="scroll"><div class="col" id="col"></div></div>
-    <button class="ir-fim" id="irFim" title="Ir para o fim"><svg viewBox="0 0 24 24"><path d="M12 5v13m-5-5 5 5 5-5"/></svg></button>
+    <button class="ir-fim" id="irFim" title="Ir para o fim" data-i18n-title="html.irParaOFim"><svg viewBox="0 0 24 24"><path d="M12 5v13m-5-5 5 5 5-5"/></svg></button>
     <div class="dock">
-      <div class="comandos" id="comandos" role="listbox" aria-label="Comandos"></div>
+      <div class="comandos" id="comandos" role="listbox" aria-label="Comandos" data-i18n-aria-label="html.comandos"></div>
       <div class="picker glass" id="picker">
         <div class="hd">
           <div class="abas" role="tablist">
-            <button class="aba on" data-aba="claudinho" role="tab">Temas <small>16</small></button>
-            <button class="aba" data-aba="biblioteca" role="tab">Biblioteca <small id="bibN"></small></button>
-            <button class="aba" data-aba="meus" role="tab">Meus <small id="meusN">0</small></button>
+            <button class="aba on" data-aba="claudinho" role="tab"><span data-i18n="html.temas">Temas</span> <small>16</small></button>
+            <button class="aba" data-aba="biblioteca" role="tab"><span data-i18n="html.biblioteca">Biblioteca</span> <small id="bibN"></small></button>
+            <button class="aba" data-aba="meus" role="tab"><span data-i18n="html.meus">Meus</span> <small id="meusN">0</small></button>
           </div>
         </div>
         <div class="painel on" data-aba="claudinho"><div class="cards" id="cards"></div></div>
         <div class="painel" data-aba="biblioteca">
           <div class="filtros">
-            <label class="busca-bib"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="bibBusca" placeholder="Buscar animações (em inglês: ocean, cat, rain, galaxy…)" /></label>
+            <label class="busca-bib"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="bibBusca" placeholder="Buscar animações (em inglês: ocean, cat, rain, galaxy…)" data-i18n-placeholder="html.buscarAnimacoes" /></label>
             <div class="cats" id="bibCats"></div>
           </div>
           <div class="grade" id="bibGrade"></div>
-          <p class="credito">Animações da biblioteca <a href="https://www.ascii-magic.com/ascii">ASCII Magic</a>, licença MIT. Ocean Sunset e Starry Ridge vêm de fotos do Unsplash (César Couto, Vincentiu Solomon).</p>
+          <p class="credito"><span data-i18n="html.creditoBiblioteca">Animações da biblioteca</span> <a href="https://www.ascii-magic.com/ascii">ASCII Magic</a><span data-i18n="html.creditoLicenca">, licença MIT. Ocean Sunset e Starry Ridge vêm de fotos do Unsplash (César Couto, Vincentiu Solomon).</span></p>
         </div>
         <div class="painel" data-aba="meus">
           <div class="meus-topo">
-            <p>Seus fundos: imagens, GIFs e vídeos, ou animações do <a href="https://www.ascii-motion.com">ASCII Motion</a> (exportadas como <b>JSON</b>). Também dá pra arrastar os arquivos pra cá.</p>
-            <button class="btn forte" id="addFundo">Imagem, GIF ou vídeo</button>
+            <p><span data-i18n="html.meusFundos">Seus fundos: imagens, GIFs e vídeos, ou animações do</span> <a href="https://www.ascii-motion.com">ASCII Motion</a> <span data-i18n="html.meusExportadas">(exportadas como</span> <b>JSON</b><span data-i18n="html.meusArrastar">). Também dá pra arrastar os arquivos pra cá.</span></p>
+            <button class="btn forte" id="addFundo" data-i18n="html.addFundo">Imagem, GIF ou vídeo</button>
             <button class="btn" id="importar">ASCII Motion</button>
           </div>
           <div class="grade" id="meusGrade"></div>
@@ -94,43 +94,47 @@
       <div class="fila" id="fila"></div>
       <div class="composer glass" id="composer">
         <div class="anexos" id="anexos"></div>
-        <textarea id="entrada" rows="1" placeholder="Mensagem para o Claude"></textarea>
+        <textarea id="entrada" rows="1" placeholder="Mensagem para o Claude" data-i18n-placeholder="html.mensagem"></textarea>
         <div class="composer-base">
-          <button class="icone clipe" id="clipe" title="Anexar arquivos ou imagens"><svg viewBox="0 0 24 24"><path d="m20 11.5-7.8 7.8a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/></svg></button>
+          <button class="icone clipe" id="clipe" title="Anexar arquivos ou imagens" data-i18n-title="html.anexar"><svg viewBox="0 0 24 24"><path d="m20 11.5-7.8 7.8a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/></svg></button>
           <label class="chip"><svg viewBox="0 0 24 24"><path d="M12 3.5 4.5 7v5c0 4.2 3.2 7.6 7.5 8.5 4.3-.9 7.5-4.3 7.5-8.5V7z"/></svg><select id="modo">
-            <option value="default">Perguntar</option>
-            <option value="acceptEdits">Aceitar edições</option>
-            <option value="plan">Modo plano</option>
-            <option value="auto">Automático</option>
+            <option value="default" data-i18n="html.modoPerguntar">Perguntar</option>
+            <option value="acceptEdits" data-i18n="html.modoAceitarEdicoes">Aceitar edições</option>
+            <option value="plan" data-i18n="html.modoPlano">Modo plano</option>
+            <option value="auto" data-i18n="html.modoAutomatico">Automático</option>
           </select></label>
           <label class="chip"><svg viewBox="0 0 24 24"><path d="M12 3.5v3m0 11v3m8.5-8.5h-3m-11 0h-3m14-6-2.1 2.1M8.6 15.4l-2.1 2.1m0-11 2.1 2.1m6.8 6.8 2.1 2.1"/></svg><select id="modelo">
-            <option value="">Padrão</option>
+            <option value="" data-i18n="html.padrao">Padrão</option>
             <option value="claude-opus-5-5">Opus 5.5</option>
             <option value="claude-sonnet-5-5">Sonnet 5.5</option>
             <option value="claude-haiku-5-5">Haiku 5.5</option>
             <option value="claude-fable-5-1">Fable 5.1</option>
           </select></label>
-          <label class="chip" title="Quanto o Claude pensa antes de responder"><svg viewBox="0 0 24 24"><path d="M4.5 16a7.5 7.5 0 1 1 15 0"/><path d="m12 16 3.5-4.5"/><circle cx="12" cy="16" r="1.2"/></svg><select id="esforco">
-            <option value="">Esforço padrão</option>
-            <option value="low">Esforço baixo</option>
-            <option value="medium">Esforço médio</option>
-            <option value="high">Esforço alto</option>
-            <option value="xhigh">Esforço muito alto</option>
-            <option value="max">Esforço máximo</option>
+          <label class="chip" title="Quanto o Claude pensa antes de responder" data-i18n-title="html.esforcoDica"><svg viewBox="0 0 24 24"><path d="M4.5 16a7.5 7.5 0 1 1 15 0"/><path d="m12 16 3.5-4.5"/><circle cx="12" cy="16" r="1.2"/></svg><select id="esforco">
+            <option value="" data-i18n="html.esforcoPadrao">Esforço padrão</option>
+            <option value="low" data-i18n="html.esforcoBaixo">Esforço baixo</option>
+            <option value="medium" data-i18n="html.esforcoMedio">Esforço médio</option>
+            <option value="high" data-i18n="html.esforcoAlto">Esforço alto</option>
+            <option value="xhigh" data-i18n="html.esforcoMuitoAlto">Esforço muito alto</option>
+            <option value="max" data-i18n="html.esforcoMaximo">Esforço máximo</option>
           </select></label>
           <div class="medidor" id="medidor" hidden><i><b></b></i><span></span></div>
-          <button class="enviar" id="enviar" title="Enviar (Enter)"><svg viewBox="0 0 24 24"><path class="seta" d="M12 18V6m-5 5 5-5 5 5"/><rect class="quadrado" x="7.5" y="7.5" width="9" height="9" rx="1.5"/></svg></button>
+          <button class="enviar" id="enviar" title="Enviar (Enter)" data-i18n-title="html.enviar"><svg viewBox="0 0 24 24"><path class="seta" d="M12 18V6m-5 5 5-5 5 5"/><rect class="quadrado" x="7.5" y="7.5" width="9" height="9" rx="1.5"/></svg></button>
         </div>
       </div>
     </div>
   </main>
 </div>
 <div class="menu glass" id="menu"></div>
-<div class="personal" id="personal" role="dialog" aria-label="Personalizar"><div class="personal-caixa" id="personalCaixa"></div></div>
-<div class="creditos" id="creditos" role="dialog" aria-label="Créditos"><div class="creditos-caixa" id="creditosCaixa"></div></div>
-<div class="soltar" id="soltar"><div><svg viewBox="0 0 24 24"><path d="M12 15V4m-4.5 4.5L12 4l4.5 4.5"/><path d="M4.5 14.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><b>Solte para anexar</b><span>Imagens vão direto pro Claude; outros arquivos ele abre pelo caminho.</span></div></div>
+<div class="personal" id="personal" role="dialog" aria-label="Personalizar" data-i18n-aria-label="html.personalizar"><div class="personal-caixa" id="personalCaixa"></div></div>
+<div class="creditos" id="creditos" role="dialog" aria-label="Créditos" data-i18n-aria-label="html.creditos"><div class="creditos-caixa" id="creditosCaixa"></div></div>
+<div class="soltar" id="soltar"><div><svg viewBox="0 0 24 24"><path d="M12 15V4m-4.5 4.5L12 4l4.5 4.5"/><path d="M4.5 14.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><b data-i18n="html.solteParaAnexar">Solte para anexar</b><span data-i18n="html.solteDica">Imagens vão direto pro Claude; outros arquivos ele abre pelo caminho.</span></div></div>
 
 <script src="../../node_modules/marked/lib/marked.umd.js"></script>
+<script src="i18n/pt-BR.js"></script>
+<script src="i18n/en.js"></script>
+<script src="i18n/es.js"></script>
+<script src="i18n/i18n.js"></script>
 <script src="wallpapers/engine.js"></script>
 <script src="wallpapers/audio.js"></script>
 <script src="wallpapers/themes.js"></script>

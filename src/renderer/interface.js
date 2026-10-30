@@ -7,7 +7,7 @@
 // ---- activity rail ----------------------------------------------------------------------
 // Tiles coloured by kind of tool; hover names it, click jumps to its card.
 const trilho = document.createElement("div");
-trilho.className = "trilho"; trilho.setAttribute("aria-label", "Atividade da conversa");
+trilho.className = "trilho"; trilho.setAttribute("aria-label", t("interface.atividade"));
 $("titulo").after(trilho);
 const tipoFerr = (nome) => /^(Read|Glob|Grep|NotebookRead|LS)$/.test(nome) ? "ler" : /^(Write|Edit|MultiEdit|NotebookEdit)$/.test(nome) ? "editar" : /^(Bash|PowerShell)$/.test(nome) ? "rodar"
   : /^Web/.test(nome) ? "web" : nome.startsWith("mcp__claudinho__") ? "tema" : /^(Task|Agent)$/.test(nome) ? "agente" : "outro";
@@ -100,13 +100,13 @@ function camadas(el) {
   if (titulos.length >= 2) {
     const indice = document.createElement("div");
     indice.className = "indice";
-    indice.innerHTML = `<span>Nesta resposta</span>` + titulos.map((h, i) => `<button data-i="${i}">${esc(h.textContent.slice(0, 48))}</button>`).join("");
+    indice.innerHTML = `<span>${t("interface.nestaResposta")}</span>` + titulos.map((h, i) => `<button data-i="${i}">${esc(h.textContent.slice(0, 48))}</button>`).join("");
     indice.querySelectorAll("button").forEach((b) => (b.onclick = () => { el.classList.remove("dobrada"); titulos[+b.dataset.i].scrollIntoView({ behavior: "smooth", block: "start" }); }));
     corpo.before(indice);
   }
   const mais = document.createElement("button");
   mais.className = "ler-tudo";
-  const rotulo = () => (mais.innerHTML = el.classList.contains("dobrada") ? `${svg('<path d="m6 9 6 6 6-6"/>')}Ler a resposta inteira <small>${min} min</small>` : `${svg('<path d="m6 15 6-6 6 6"/>')}Recolher`);
+  const rotulo = () => (mais.innerHTML = el.classList.contains("dobrada") ? `${svg('<path d="m6 9 6 6 6-6"/>')}${t("interface.lerInteira")} <small>${t("interface.minutos", { n: min })}</small>` : `${svg('<path d="m6 15 6-6 6 6"/>')}${t("interface.recolher")}`);
   mais.onclick = () => { el.classList.toggle("dobrada"); rotulo(); if (el.classList.contains("dobrada")) el.scrollIntoView({ behavior: "smooth", block: "start" }); };
   rotulo(); corpo.after(mais);
 }

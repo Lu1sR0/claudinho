@@ -13,6 +13,11 @@ import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
 import os from "node:os";
 import { fileURLToPath, pathToFileURL } from "node:url";
+// the window's dictionaries and t(), shared with this process (globalThis)
+import "./renderer/i18n/pt-BR.js";
+import "./renderer/i18n/en.js";
+import "./renderer/i18n/es.js";
+import "./renderer/i18n/i18n.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -41,7 +46,7 @@ function chaveApi() {
 // every query goes through here: the person's Claude Code and the chosen sign-in
 function query(args) {
   const exe = acharClaude();
-  if (!exe && !temClaudeEmbutido()) throw new Error("Não encontrei o Claude Code neste computador. Instale em code.claude.com/docs/en/setup e abra o Claudinho de novo.");
+  if (!exe && !temClaudeEmbutido()) throw new Error(t("main.semClaude"));
   const extra = {};
   if (exe) extra.pathToClaudeCodeExecutable = exe;
   const chave = config.entrar === "chave" ? chaveApi() : "";
@@ -91,7 +96,10 @@ function lerConfig() {
   const antigos = ["Tessela", "claude-vivo"].map((n) => path.join(app.getPath("appData"), n, "config.json"));
   for (const p of [configPath(), ...antigos]) { try { config = { ...config, ...JSON.parse(fs.readFileSync(p, "utf8")) }; break; } catch {} }
   if (!fs.existsSync(config.cwd)) config.cwd = app.getPath("home");
+  usaIdioma(idiomaEscolhido());
 }
+// The language chosen in Personalizar → Geral or, until there is one, the system's.
+const idiomaEscolhido = () => config.visual?.geral?.idioma || app.getLocale();
 function salvarConfig() {
   try { fs.mkdirSync(path.dirname(configPath()), { recursive: true }); fs.writeFileSync(configPath(), JSON.stringify(config, null, 2)); } catch {}
 }
@@ -151,8 +159,8 @@ function montaPrompt(texto, anexos = [], uuid) {
     if (dados && Object.values(IMAGEM).includes(mime)) imagens.push({ type: "image", source: { type: "base64", media_type: mime, data: dados } });
   }
   let t = texto;
-  if (caminhos.length) t += `${t ? "\n\n" : ""}Arquivos anexados:\n${caminhos.map((c) => `- ${c}`).join("\n")}`;
-  const conteudo = imagens.length ? [...imagens, { type: "text", text: t || "Veja a imagem anexada." }] : t;
+  if (caminhos.length) t += `${t ? "\n\n" : ""}${globalThis.t("main.anexados")}\n${caminhos.map((c) => `- ${c}`).join("\n")}`;
+  const conteudo = imagens.length ? [...imagens, { type: "text", text: t || globalThis.t("main.vejaImagem") }] : t;
   const mensagem = { type: "user", uuid, message: { role: "user", content: conteudo }, parent_tool_use_id: null };
   return (async function* () { yield mensagem; })();
 }
@@ -164,8 +172,8 @@ async function tituloAutomatico(j, id, pergunta, resposta) {
   const dir = j.cwd;
   try {
     for await (const m of query({
-      prompt: `Dê um título curto (de 2 a 6 palavras, em português, sem aspas e sem ponto final) para esta conversa.\n\nPedido: ${pergunta.slice(0, 600)}\n\nResposta: ${resposta.slice(0, 600)}`,
-      options: { cwd: dir, model: "claude-haiku-5-5", tools: [], maxTurns: 1, persistSession: false, settingSources: [], systemPrompt: "Você só responde com um título curto." },
+      prompt: t("main.tituloPrompt", { pergunta: pergunta.slice(0, 600), resposta: resposta.slice(0, 600) }),
+      options: { cwd: dir, model: "claude-haiku-5-5", tools: [], maxTurns: 1, persistSession: false, settingSources: [], systemPrompt: t("main.tituloSistema") },
     })) if (m.type === "result" && m.subtype === "success") titulo = String(m.result || "").split("\n")[0].replace(/^["'“”*#\s]+|["'“”*.\s]+$/g, "").slice(0, 60);
   } catch {}
   if (!titulo) return;
@@ -222,20 +230,20 @@ function leMotion(conteudo, nomeArquivo) {
       return { linhas: linhas.map((l) => l.join("").replace(/\s+$/, "")), fg, bg, dur: f.duration || 1000 / fps };
     }) };
   } else if (o) {
-    throw new Error("Esse arquivo do ASCII Motion tem camadas. No ASCII Motion, use Export → JSON e importe o arquivo .json.");
+    throw new Error(t("main.motionCamadas"));
   } else {
     const quadros = conteudo.replace(/\r/g, "").split(/\n-{3,}\n/).map((q) => ({ linhas: q.split("\n"), fg: {}, bg: {}, dur: 100 }));
     anim = { nome, w: 0, h: 0, quadros };
   }
   anim.quadros = anim.quadros.filter((q) => q.linhas.length).slice(0, 3000);
-  if (!anim.quadros.length) throw new Error("Nenhum quadro no arquivo.");
+  if (!anim.quadros.length) throw new Error(t("main.motionVazio"));
   anim.w = Math.min(400, Math.max(anim.w || 0, ...anim.quadros.map((q) => Math.max(0, ...q.linhas.map((l) => [...l].length)))));
   anim.h = Math.min(400, Math.max(anim.h || 0, ...anim.quadros.map((q) => q.linhas.length)));
   if (!anim.fundo || anim.fundo === "transparent") anim.fundo = "#0d0d0f";
   return anim;
 }
 function importaMotion(arquivo) {
-  if (fs.statSync(arquivo).size > 40 * 1024 * 1024) throw new Error("Arquivo grande demais (máx. 40 MB).");
+  if (fs.statSync(arquivo).size > 40 * 1024 * 1024) throw new Error(t("main.grandeDemais"));
   const anim = leMotion(fs.readFileSync(arquivo, "utf8"), arquivo);
   const base = anim.nome.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "animacao";
   anim.id = `${base}-${crypto.randomBytes(3).toString("hex")}`;
@@ -249,11 +257,11 @@ const idMotion = (id) => String(id).replace(/[^a-z0-9-]/g, "");
 // the app icon, copied into the app's data folder so they keep working if the
 // originals move. The window gets them back as file:// URLs.
 const TIPOS = {
-  fundos: { nome: "Imagem, GIF ou vídeo", ext: ["png", "jpg", "jpeg", "webp", "gif", "avif", "mp4", "webm", "mov", "m4v"] },
-  sons: { nome: "Som", ext: ["mp3", "wav", "ogg", "m4a", "flac", "aac", "opus"] },
-  musica: { nome: "Música", ext: ["mp3", "wav", "ogg", "m4a", "flac", "aac", "opus"] },
-  fontes: { nome: "Fonte", ext: ["ttf", "otf", "woff", "woff2"] },
-  icone: { nome: "Ícone", ext: ["png", "ico", "jpg", "jpeg"] },
+  fundos: { get nome() { return t("main.tipoFundos"); }, ext: ["png", "jpg", "jpeg", "webp", "gif", "avif", "mp4", "webm", "mov", "m4v"] },
+  sons: { get nome() { return t("main.tipoSons"); }, ext: ["mp3", "wav", "ogg", "m4a", "flac", "aac", "opus"] },
+  musica: { get nome() { return t("main.tipoMusica"); }, ext: ["mp3", "wav", "ogg", "m4a", "flac", "aac", "opus"] },
+  fontes: { get nome() { return t("main.tipoFontes"); }, ext: ["ttf", "otf", "woff", "woff2"] },
+  icone: { get nome() { return t("main.tipoIcone"); }, ext: ["png", "ico", "jpg", "jpeg"] },
 };
 const pastaPessoal = (tipo) => path.join(app.getPath("userData"), "pessoal", tipo);
 const itemPessoal = (tipo, arquivo) => ({ id: arquivo, nome: arquivo.replace(/^[0-9a-f]{6}-/, "").replace(/\.[^.]+$/, ""), url: pathToFileURL(path.join(pastaPessoal(tipo), arquivo)).href, ext: path.extname(arquivo).slice(1).toLowerCase() });
@@ -265,7 +273,7 @@ function listaPessoal(tipo) {
 }
 function copiaPessoal(tipo, origem, nome) {
   const ext = path.extname(origem).slice(1).toLowerCase();
-  if (!TIPOS[tipo]?.ext.includes(ext)) throw new Error(`Formato .${ext} não serve para ${TIPOS[tipo]?.nome.toLowerCase() || tipo}.`);
+  if (!TIPOS[tipo]?.ext.includes(ext)) throw new Error(t("main.formatoErrado", { ext, tipo: TIPOS[tipo]?.nome.toLowerCase() || tipo }));
   const base = (nome || path.basename(origem, path.extname(origem))).replace(/[^\p{L}\p{N} _().-]+/gu, "").trim().slice(0, 60) || tipo;
   const arquivo = `${crypto.randomBytes(3).toString("hex")}-${base}.${ext}`;
   fs.mkdirSync(pastaPessoal(tipo), { recursive: true });
@@ -311,7 +319,7 @@ function listaWallpaperEngine() {
       }
     }
   }
-  itens.sort((a, b) => a.nome.localeCompare(b.nome, "pt"));
+  itens.sort((a, b) => a.nome.localeCompare(b.nome, idiomaAtual()));
   return { achou, itens, cenas };
 }
 // Shims so a web wallpaper starts the way it does inside Wallpaper Engine: its
@@ -340,7 +348,7 @@ function listaWeb() {
   });
 }
 function importaWallpaperEngine(pasta) {
-  if (!listaWallpaperEngine().itens.some((i) => i.pasta === pasta)) throw new Error("Esse papel de parede não está mais na biblioteca do Wallpaper Engine.");
+  if (!listaWallpaperEngine().itens.some((i) => i.pasta === pasta)) throw new Error(t("main.weSumiu"));
   const p = lerProjeto(pasta), nome = String(p.title || "Wallpaper Engine").trim().slice(0, 60);
   if (String(p.type).toLowerCase() === "video") return copiaPessoal("fundos", path.join(pasta, p.file), nome);
   const id = `${crypto.randomBytes(3).toString("hex")}-${nome.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "web"}`;
@@ -418,7 +426,7 @@ async function turno(j, texto, anexos) {
         // What the last request carried is how full the context is.
         const u = msg.message.usage;
         if (u) contexto = (u.input_tokens || 0) + (u.cache_read_input_tokens || 0) + (u.cache_creation_input_tokens || 0) + (u.output_tokens || 0);
-        if (msg.error) ev({ tipo: "erro", texto: `Erro da API: ${msg.error}` });
+        if (msg.error) ev({ tipo: "erro", texto: t("main.erroApi", { erro: msg.error }) });
       } else if (msg.type === "user" && !msg.parent_tool_use_id && Array.isArray(msg.message?.content)) {
         for (const b of msg.message.content) {
           if (b.type === "tool_result") {
@@ -441,6 +449,7 @@ async function turno(j, texto, anexos) {
   } finally {
     j.atual = null;
     ev({ tipo: "parado" });
+    if (j.recarregar) recarrega(j);
     if (novo && j.sessionId && geral.titulo !== false && resposta && !texto.startsWith("/")) tituloAutomatico(j, j.sessionId, texto, resposta);
   }
 }
@@ -549,19 +558,19 @@ ipcMain.handle("estado", (e) => ({ ...config, cwd: J(e).cwd, sessionId: J(e).ses
 ipcMain.handle("enviar", (e, texto, anexos) => {
   const j = J(e);
   if (j.atual) return false;
-  if (j.sessionId && emOutra(j, j.sessionId)) { enviarEvento(j, { tipo: "erro", texto: "Essa conversa está rodando em outra janela. Espere ela terminar." }); return false; }
+  if (j.sessionId && emOutra(j, j.sessionId)) { enviarEvento(j, { tipo: "erro", texto: t("main.emOutraJanela") }); return false; }
   turno(j, String(texto), Array.isArray(anexos) ? anexos : []); return true;
 });
 ipcMain.handle("janela_nova", (_e, sessao) => { criarJanela(sessao || undefined); });
 ipcMain.handle("comandos", async (e) => { try { return await comandos(J(e)); } catch (e) { console.log("[comandos]", e?.message || e); return []; } });
 ipcMain.handle("anexar", async (e) => {
-  const r = await dialog.showOpenDialog(J(e).win, { title: "Anexar arquivos", defaultPath: J(e).cwd, properties: ["openFile", "multiSelections"] });
+  const r = await dialog.showOpenDialog(J(e).win, { title: t("main.anexar"), defaultPath: J(e).cwd, properties: ["openFile", "multiSelections"] });
   return r.canceled ? [] : r.filePaths;
 });
 ipcMain.handle("motion_importar", async (e, caminho) => {
   let arquivo = caminho;
   if (!arquivo) {
-    const r = await dialog.showOpenDialog(J(e).win, { title: "Importar animação do ASCII Motion", filters: [{ name: "ASCII Motion", extensions: ["json", "asciimtn", "txt"] }], properties: ["openFile"] });
+    const r = await dialog.showOpenDialog(J(e).win, { title: t("main.importarMotion"), filters: [{ name: "ASCII Motion", extensions: ["json", "asciimtn", "txt"] }], properties: ["openFile"] });
     if (r.canceled || !r.filePaths[0]) return null;
     arquivo = r.filePaths[0];
   }
@@ -639,16 +648,16 @@ ipcMain.handle("uso", async (e) => {
 // on disk and reused until the next day.
 ipcMain.handle("novidades", async () => {
   const arq = path.join(app.getPath("userData"), "novidades.json");
-  try { const c = JSON.parse(fs.readFileSync(arq, "utf8")); if (Date.now() - c.quando < 20 * 3600e3 && c.itens?.length) return c.itens; } catch {}
+  try { const c = JSON.parse(fs.readFileSync(arq, "utf8")); if (Date.now() - c.quando < 20 * 3600e3 && c.itens?.length && (c.idioma || "pt-BR") === idiomaAtual()) return c.itens; } catch {}
   let texto = "";
   try {
     for await (const m of query({
-      prompt: "Pesquise na web as novidades mais recentes (últimas semanas) sobre a Anthropic, o Claude e o Claude Code. Responda só com 4 frases curtas em português do Brasil, uma por linha, sem marcadores nem links, cada uma com um fato novo e concreto (no máximo 120 caracteres cada). Se não achar nada recente, responda vazio.",
-      options: { cwd: app.getPath("home"), model: "claude-haiku-5-5", tools: ["WebSearch"], allowedTools: ["WebSearch"], maxTurns: 4, persistSession: false, settingSources: [], systemPrompt: "Você pesquisa e resume notícias com precisão. Nunca invente." },
+      prompt: t("main.novidadesPrompt"),
+      options: { cwd: app.getPath("home"), model: "claude-haiku-5-5", tools: ["WebSearch"], allowedTools: ["WebSearch"], maxTurns: 4, persistSession: false, settingSources: [], systemPrompt: t("main.novidadesSistema") },
     })) if (m.type === "result" && m.subtype === "success") texto = String(m.result || "");
   } catch {}
   const itens = texto.split(/\r?\n/).map((l) => l.replace(/^[-*•\d.\s]+/, "").trim()).filter((l) => l.length > 15 && l.length < 200).slice(0, 5);
-  if (itens.length) try { fs.writeFileSync(arq, JSON.stringify({ quando: Date.now(), itens })); } catch {}
+  if (itens.length) try { fs.writeFileSync(arq, JSON.stringify({ quando: Date.now(), idioma: idiomaAtual(), itens })); } catch {}
   return itens;
 });
 // Files Claude changed open in their own app, or show in their folder.
@@ -665,7 +674,7 @@ ipcMain.handle("responder", (_e, { id, respostas }) => {
 // query on the conversation does it when no turn is running.
 ipcMain.handle("desfazer", async (e, { uuid, simular }) => {
   const { sessionId, atual, cwd } = J(e);
-  if (!sessionId || !uuid) return { canRewind: false, error: "Sem conversa." };
+  if (!sessionId || !uuid) return { canRewind: false, error: t("main.semConversa") };
   if (atual) return await atual.q.rewindFiles(uuid, { dryRun: !!simular }).catch((e) => ({ canRewind: false, error: String(e.message || e) }));
   const ac = new AbortController();
   let solta;
@@ -717,8 +726,8 @@ function titulosDoApp() {
 // worked in (the terminal, the Claude app, other windows: all the same files).
 // Scratch folders the Claude app makes for loose chats count as one project.
 const projeto = (cwd) => {
-  if (!cwd) return "Sem pasta";
-  if (/[\\/]scratch-workspaces[\\/]|[\\/]scratch-\d{4}-\d\d-\d\d-[0-9a-f]+$/i.test(cwd)) return "Rascunhos";
+  if (!cwd) return t("main.semPasta");
+  if (/[\\/]scratch-workspaces[\\/]|[\\/]scratch-\d{4}-\d\d-\d\d-[0-9a-f]+$/i.test(cwd)) return t("main.rascunhos");
   return cwd.split(/[\\/]/).filter(Boolean).pop();
 };
 ipcMain.handle("sessoes", async (e, { todas } = {}) => {
@@ -727,7 +736,7 @@ ipcMain.handle("sessoes", async (e, { todas } = {}) => {
     return lista.map((s) => {
       const a = doApp.get(s.sessionId);
       // a name the person gave wins (in the app or here); then the app's own title
-      const titulo = (a?.doUsuario && a.titulo) || s.customTitle || a?.titulo || s.summary || s.firstPrompt || "Sem título";
+      const titulo = (a?.doUsuario && a.titulo) || s.customTitle || a?.titulo || s.summary || s.firstPrompt || t("main.semTitulo");
       return { id: s.sessionId, titulo, quando: Math.max(s.lastModified || 0, a?.quando || 0), cwd: s.cwd || "", projeto: projeto(s.cwd), doApp: !!a, arquivada: !!a?.arquivada };
     }).filter((s) => !s.arquivada);
   } catch { return []; }
@@ -748,20 +757,20 @@ ipcMain.handle("ramificar", async (e, { id, uuid, titulo, cwd }) => {
     const dir = cwd && fs.existsSync(cwd) ? cwd : j.cwd;
     const r = await forkSession(origem, { dir, upToMessageId: uuid || undefined, title: titulo || undefined });
     j.cwd = dir; j.sessionId = r.sessionId;
-    return { id: r.sessionId, titulo: titulo || "Ramo", cwd: dir };
+    return { id: r.sessionId, titulo: titulo || t("main.ramo"), cwd: dir };
   } catch (e) { console.log("[ramificar]", e?.message || e); return null; }
 });
 // Export a conversation as Markdown, where the person chooses.
 ipcMain.handle("exportar", async (e, { id, titulo, cwd }) => {
-  const nome = (titulo || "conversa").replace(/[\\/:*?"<>|]+/g, " ").trim().slice(0, 80) || "conversa";
-  const r = await dialog.showSaveDialog(J(e).win, { title: "Exportar conversa", defaultPath: path.join(app.getPath("documents"), nome + ".md"), filters: [{ name: "Markdown", extensions: ["md"] }] });
+  const nome = (titulo || t("main.conversaArquivo")).replace(/[\\/:*?"<>|]+/g, " ").trim().slice(0, 80) || t("main.conversaArquivo");
+  const r = await dialog.showSaveDialog(J(e).win, { title: t("main.exportar"), defaultPath: path.join(app.getPath("documents"), nome + ".md"), filters: [{ name: "Markdown", extensions: ["md"] }] });
   if (r.canceled || !r.filePath) return null;
   try {
-  const partes = [`# ${titulo || "Conversa"}`, ""];
+  const partes = [`# ${titulo || t("main.conversa")}`, ""];
   for (const m of await historico(id, cwd || J(e).cwd)) {
-    if (m.papel === "eu") partes.push(`**Você:**${m.imagens ? ` _(${m.imagens} imagem${m.imagens > 1 ? "ns" : ""})_` : ""}`, "", m.texto || "", "");
+    if (m.papel === "eu") partes.push(`**${t("main.voce")}:**${m.imagens ? ` _(${t("main.imagens", { n: m.imagens })})_` : ""}`, "", m.texto || "", "");
     else if (m.papel === "claude") partes.push("**Claude:**", "", m.texto, "");
-    else partes.push(`> Ferramenta: ${m.nome}`, "");
+    else partes.push(`> ${t("main.ferramenta")}: ${m.nome}`, "");
   }
   fs.writeFileSync(r.filePath, partes.join("\n"));
   return r.filePath;
@@ -799,7 +808,7 @@ ipcMain.handle("apagar", async (e, id, cwd) => {
 ipcMain.handle("pasta", async (e) => {
   const j = J(e);
   if (j.atual) return null;
-  const r = await dialog.showOpenDialog(j.win, { title: "Pasta do projeto", defaultPath: j.cwd, properties: ["openDirectory"] });
+  const r = await dialog.showOpenDialog(j.win, { title: t("main.pastaProjeto"), defaultPath: j.cwd, properties: ["openDirectory"] });
   if (r.canceled || !r.filePaths[0]) return null;
   config.cwd = j.cwd = r.filePaths[0]; j.sessionId = null; salvarConfig(); return j.cwd;
 });
@@ -813,14 +822,23 @@ ipcMain.handle("visual_salvar", (_e, visual) => {
   if (antes.icone !== config.visual.icone) aplicaIcone();
   if (config.visual.nome) for (const o of janelas.values()) o.win.setTitle(config.visual.nome);
   for (const o of janelas.values()) if (o !== J(_e)) enviarEvento(o, { tipo: "visual", visual: config.visual });
+  if (idiomaDe(idiomaEscolhido()) !== idiomaAtual()) { usaIdioma(idiomaEscolhido()); for (const o of janelas.values()) recarrega(o); }
   return config.visual;
 });
+// A new language: each window loads again on the conversation it shows; one
+// where Claude is working waits for the turn to end.
+function recarrega(j) {
+  if (j.atual) { j.recarregar = true; return; }
+  j.recarregar = false;
+  j.win.loadFile(path.join(here, "renderer", "index.html"), j.sessionId ? { query: { sessao: j.sessionId } } : undefined);
+}
+ipcMain.on("idioma", (e) => { e.returnValue = idiomaAtual(); });
 ipcMain.handle("pessoal_lista", (_e, tipo) => listaPessoal(tipo));
 ipcMain.handle("pessoal_importar", async (e, tipo, caminhos) => {
-  if (!TIPOS[tipo]) return { erro: "Tipo desconhecido." };
+  if (!TIPOS[tipo]) return { erro: t("main.tipoDesconhecido") };
   let lista = Array.isArray(caminhos) ? caminhos.filter(Boolean) : [];
   if (!lista.length) {
-    const r = await dialog.showOpenDialog(J(e).win, { title: `Escolher ${TIPOS[tipo].nome.toLowerCase()}`, filters: [{ name: TIPOS[tipo].nome, extensions: TIPOS[tipo].ext }], properties: ["openFile", ...(tipo === "icone" ? [] : ["multiSelections"])] });
+    const r = await dialog.showOpenDialog(J(e).win, { title: t("main.escolher", { tipo: TIPOS[tipo].nome.toLowerCase() }), filters: [{ name: TIPOS[tipo].nome, extensions: TIPOS[tipo].ext }], properties: ["openFile", ...(tipo === "icone" ? [] : ["multiSelections"])] });
     if (r.canceled) return { itens: [] };
     lista = r.filePaths;
   }
@@ -842,7 +860,7 @@ ipcMain.handle("conta_salvar", (_e, { entrar, chave }) => {
   if (typeof chave === "string") {
     const c = chave.trim();
     if (!c) delete config.chaveApi;
-    else if (!safeStorage.isEncryptionAvailable()) return { erro: "O sistema não oferece armazenamento seguro para a chave." };
+    else if (!safeStorage.isEncryptionAvailable()) return { erro: t("main.semCifra") };
     else config.chaveApi = safeStorage.encryptString(c).toString("base64");
   }
   salvarConfig();

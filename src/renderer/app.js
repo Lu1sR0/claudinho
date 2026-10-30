@@ -30,7 +30,7 @@ const ICONE = {
   janela: svg('<rect x="3.5" y="5.5" width="13" height="13" rx="2"/><path d="M8.5 5.5V4.5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-1"/>'),
   duplicar: svg('<rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5v-2a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/>'),
 };
-const horaAgora = () => new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+const horaAgora = () => new Date().toLocaleTimeString(idiomaAtual(), { hour: "2-digit", minute: "2-digit" });
 const iconeDa = (nome) => (nome === "Bash" ? ICONE.terminal : /^(Read|NotebookRead)$/.test(nome) ? ICONE.arquivo : /^(Write|Edit|MultiEdit|NotebookEdit)$/.test(nome) ? ICONE.editar
   : /^(Glob|Grep|ToolSearch)$/.test(nome) ? ICONE.busca : /^Web/.test(nome) ? ICONE.web : nome.startsWith("mcp__claudinho__") ? ICONE.tema : ICONE.ferramenta);
 
@@ -41,16 +41,16 @@ const md = (s) => marked.parse(s || "");
 function decora(el) {
   for (const pre of el.querySelectorAll("pre")) {
     if (pre.parentElement.classList.contains("codigo")) continue;
-    const code = pre.querySelector("code"), lang = (code?.className.match(/language-(\S+)/) || [])[1] || "código";
+    const code = pre.querySelector("code"), lang = (code?.className.match(/language-(\S+)/) || [])[1] || t("app.codigo");
     const caixa = document.createElement("div"); caixa.className = "codigo";
-    caixa.innerHTML = `<div class="codigo-topo"><span>${esc(lang)}</span><button>${ICONE.copiar}<span>Copiar</span></button></div>`;
+    caixa.innerHTML = `<div class="codigo-topo"><span>${esc(lang)}</span><button>${ICONE.copiar}<span>${t("app.copiar")}</span></button></div>`;
     pre.replaceWith(caixa); caixa.append(pre);
     caixa.querySelector("button").onclick = (e) => copia(pre.innerText, e.currentTarget);
   }
 }
 function copia(texto, botao) {
   navigator.clipboard.writeText(texto).then(() => {
-    const antes = botao.innerHTML; botao.innerHTML = `${ICONE.ok}<span>Copiado</span>`;
+    const antes = botao.innerHTML; botao.innerHTML = `${ICONE.ok}<span>${t("app.copiado")}</span>`;
     setTimeout(() => (botao.innerHTML = antes), 1400);
   });
 }
@@ -68,7 +68,7 @@ function meu(texto, anexos = [], imagens = 0, hora = horaAgora()) {
   const el = bloco("msg eu");
   if (hora) el.dataset.hora = hora;
   const desfaz = document.createElement("button");
-  desfaz.className = "desfaz"; desfaz.title = "Desfazer as mudanças nos arquivos feitas a partir desta mensagem"; desfaz.innerHTML = svg('<path d="M9 7.5 4.5 12 9 16.5"/><path d="M5 12h9.5a5 5 0 0 1 0 10H12"/>');
+  desfaz.className = "desfaz"; desfaz.title = t("app.desfazer"); desfaz.innerHTML = svg('<path d="M9 7.5 4.5 12 9 16.5"/><path d="M5 12h9.5a5 5 0 0 1 0 10H12"/>');
   desfaz.onclick = () => desfazDaqui(el);
   el.append(desfaz);
   if (anexos.length || imagens) {
@@ -77,7 +77,7 @@ function meu(texto, anexos = [], imagens = 0, hora = horaAgora()) {
       if (x.url) { const img = document.createElement("img"); img.src = x.url; img.alt = x.nome; img.title = x.nome; a.append(img); }
       else a.append(chipArquivo(x.nome));
     }
-    if (imagens) a.append(chipArquivo(imagens === 1 ? "1 imagem" : `${imagens} imagens`));
+    if (imagens) a.append(chipArquivo(t("app.imagens", { n: imagens })));
     el.append(a);
   }
   if (texto) el.append(document.createTextNode(texto));
@@ -87,8 +87,8 @@ function chipArquivo(nome) { const s = document.createElement("span"); s.classNa
 function aviso(texto, erro = false) { bloco("aviso" + (erro ? " erro" : ""), esc(texto)); }
 
 function mostraPensando(tokens) {
-  if (!pensando) pensando = bloco("pensando", `${mosaicoMini()}<b>Pensando…</b><span class="n"></span>`);
-  if (tokens) pensando.querySelector(".n").textContent = `${tokens >= 1000 ? (tokens / 1000).toFixed(1).replace(".", ",") + " mil" : tokens} tokens`;
+  if (!pensando) pensando = bloco("pensando", `${mosaicoMini()}<b>${t("app.pensando")}</b><span class="n"></span>`);
+  if (tokens) pensando.querySelector(".n").textContent = `${tokens >= 1000 ? (tokens / 1000).toLocaleString(idiomaAtual(), { maximumFractionDigits: 1 }) + t("app.mil") : tokens} tokens`;
 }
 function tiraPensando() { pensando?.remove(); pensando = null; }
 
@@ -105,7 +105,7 @@ function fechaSegmento() {
 function acoesResposta(el, texto, hora) {
   const acoes = document.createElement("div");
   acoes.className = "acoes";
-  acoes.innerHTML = `<button data-a="copiar" title="Copiar resposta">${ICONE.copiar}</button><button data-a="ouvir" title="Ler em voz alta">${ICONE.ouvir}</button><button data-a="ramo" class="ramo" title="Ramificar daqui: nova conversa a partir desta resposta">${ICONE.ramo}</button>${hora ? `<time>${hora}</time>` : ""}`;
+  acoes.innerHTML = `<button data-a="copiar" title="${t("app.copiarResposta")}">${ICONE.copiar}</button><button data-a="ouvir" title="${t("app.lerEmVoz")}">${ICONE.ouvir}</button><button data-a="ramo" class="ramo" title="${t("app.ramificarDaqui")}">${ICONE.ramo}</button>${hora ? `<time>${hora}</time>` : ""}`;
   acoes.querySelector('[data-a="copiar"]').onclick = (e) => copia(texto, e.currentTarget);
   acoes.querySelector('[data-a="ouvir"]').onclick = (e) => leEmVoz(texto, e.currentTarget);
   acoes.querySelector('[data-a="ramo"]').onclick = () => ramifica(el.dataset.uuid);
@@ -115,22 +115,22 @@ function acoesResposta(el, texto, hora) {
 function leEmVoz(texto, botao) {
   const fala = speechSynthesis;
   if (fala.speaking) { fala.cancel(); document.querySelectorAll(".acoes .falando").forEach((b) => b.classList.remove("falando")); return; }
-  const limpo = texto.replace(/```[\s\S]*?```/g, " (trecho de código) ").replace(/`([^`]*)`/g, "$1").replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/[#>*_~|]+/g, " ").replace(/\s+/g, " ").trim();
+  const limpo = texto.replace(/```[\s\S]*?```/g, t("app.trechoCodigo")).replace(/`([^`]*)`/g, "$1").replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/[#>*_~|]+/g, " ").replace(/\s+/g, " ").trim();
   const u = new SpeechSynthesisUtterance(limpo);
-  u.lang = "pt-BR";
-  const voz = fala.getVoices().find((v) => v.lang?.toLowerCase().startsWith("pt"));
+  u.lang = idiomaAtual();
+  const voz = fala.getVoices().find((v) => v.lang?.toLowerCase().startsWith(idiomaAtual().slice(0, 2)));
   if (voz) u.voice = voz;
   u.onend = u.onerror = () => botao.classList.remove("falando");
   botao.classList.add("falando"); fala.speak(u);
 }
 async function ramifica(uuid) {
   if (!uuid || rodando) return;
-  const base = $("titulo").textContent.replace(/ \(ramo\)$/, "");
-  const r = await vivo.ramificar(sessaoAtual, uuid, `${base} (ramo)`);
-  if (!r) { nota("Não deu pra ramificar esta conversa.", true); return; }
+  const base = $("titulo").textContent.replace(new RegExp(t("app.sufixoRamo").replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$"), "");
+  const r = await vivo.ramificar(sessaoAtual, uuid, `${base}${t("app.sufixoRamo")}`);
+  if (!r) { nota(t("app.naoRamificou"), true); return; }
   if (r.cwd && r.cwd !== $("pasta").title) { mostraPasta(r.cwd); todosComandos = buscandoComandos = null; }
   await abreSessao(r.id, r.titulo); carregaSessoes();
-  nota("Ramo criado: a conversa continua daqui, a original fica como estava.");
+  nota(t("app.ramoCriado"));
 }
 function texto(delta) {
   tiraPensando();
@@ -153,12 +153,12 @@ function resumo(nome, e = {}) {
   if (nome.startsWith("mcp__claudinho__")) return nomeTema(e.tema);
   return Object.values(e).find((x) => typeof x === "string") || "";
 }
-const ROTULO = { Bash: "Comando", Read: "Leu", Write: "Criou", Edit: "Editou", MultiEdit: "Editou", Glob: "Procurou arquivos", Grep: "Buscou", WebFetch: "Abriu página", WebSearch: "Pesquisou", ToolSearch: "Buscou ferramenta", TodoWrite: "Lista de tarefas", Task: "Subagente", mcp__claudinho__sugerir_tema: "Sugeriu tema", mcp__claudinho__aplicar_tema: "Aplicou tema",
-  mcp__claudinho__buscar_fundo: "Buscou fundos", mcp__claudinho__sugerir_fundo: "Sugeriu fundo", mcp__claudinho__aplicar_fundo: "Aplicou fundo" };
+const ROTULO = { Bash: t("app.rotComando"), Read: t("app.rotLeu"), Write: t("app.rotCriou"), Edit: t("app.rotEditou"), MultiEdit: t("app.rotEditou"), Glob: t("app.rotProcurouArquivos"), Grep: t("app.rotBuscou"), WebFetch: t("app.rotAbriuPagina"), WebSearch: t("app.rotPesquisou"), ToolSearch: t("app.rotBuscouFerramenta"), TodoWrite: t("app.rotListaTarefas"), Task: t("app.rotSubagente"), mcp__claudinho__sugerir_tema: t("app.rotSugeriuTema"), mcp__claudinho__aplicar_tema: t("app.rotAplicouTema"),
+  mcp__claudinho__buscar_fundo: t("app.rotBuscouFundos"), mcp__claudinho__sugerir_fundo: t("app.rotSugeriuFundo"), mcp__claudinho__aplicar_fundo: t("app.rotAplicouFundo") };
 const rotulo = (n) => ROTULO[n] || n.replace(/^mcp__([^_]+)__/, "$1 · ");
 // What a permission card asks for, in the infinitive.
-const PEDIDO = { Bash: "rodar um comando", Write: "criar um arquivo", Edit: "editar um arquivo", MultiEdit: "editar um arquivo", NotebookEdit: "editar um notebook", WebFetch: "abrir uma página", WebSearch: "pesquisar na web", Task: "iniciar um subagente" };
-const pedido = (n) => PEDIDO[n] || `usar ${rotulo(n)}`;
+const PEDIDO = { Bash: t("app.pedComando"), Write: t("app.pedCriarArquivo"), Edit: t("app.pedEditarArquivo"), MultiEdit: t("app.pedEditarArquivo"), NotebookEdit: t("app.pedEditarNotebook"), WebFetch: t("app.pedAbrirPagina"), WebSearch: t("app.pedPesquisar"), Task: t("app.pedSubagente") };
+const pedido = (n) => PEDIDO[n] || t("app.pedUsar", { nome: rotulo(n) });
 
 function ferramenta(id, nome, e, fim = null) {
   fechaSegmento(); tiraPensando();
@@ -174,7 +174,7 @@ function ferramentaFim(id, erro, saida) {
   const d = ferramentas.get(id); if (!d) return;
   const i = d.querySelector(".estado"); i.className = "estado " + (erro ? "erro" : "ok"); i.innerHTML = erro ? ICONE.erro : ICONE.ok;
   const pre = d.querySelector("pre");
-  if (saida && pre) pre.textContent += "\n\n— resultado —\n" + saida;
+  if (saida && pre) pre.textContent += "\n\n" + t("app.resultado") + "\n" + saida;
 }
 
 function permissao(ev) {
@@ -182,16 +182,16 @@ function permissao(ev) {
   const el = bloco("perm");
   el.dataset.id = ev.id;
   const diff = diffDe(ev.ferramenta, ev.entrada);
-  el.innerHTML = `<div class="t">${ICONE.escudo}<span>O Claude quer <b>${esc(pedido(ev.ferramenta))}</b></span>${diff ? diff.contagem : ""}</div>${ev.motivo ? `<div class="aviso">${esc(ev.motivo)}</div>` : ""}${diff ? `<div class="caminho">${esc(ev.entrada.file_path || "")}</div>` + diff.html : `<pre>${esc(JSON.stringify(ev.entrada, null, 2).slice(0, 3000))}</pre>`}`;
+  el.innerHTML = `<div class="t">${ICONE.escudo}<span>${t("app.claudeQuer", { pedido: `<b>${esc(pedido(ev.ferramenta))}</b>` })}</span>${diff ? diff.contagem : ""}</div>${ev.motivo ? `<div class="aviso">${esc(ev.motivo)}</div>` : ""}${diff ? `<div class="caminho">${esc(ev.entrada.file_path || "")}</div>` + diff.html : `<pre>${esc(JSON.stringify(ev.entrada, null, 2).slice(0, 3000))}</pre>`}`;
   const linha = document.createElement("div"); linha.className = "b";
   const botao = (rot, dec, cls) => {
     const b = document.createElement("button"); b.textContent = rot; b.className = "btn" + (cls ? " " + cls : "");
-    b.onclick = () => { vivo.permissao(ev.id, dec); el.className = "resolvido"; el.innerHTML = `${dec === "negar" ? ICONE.erro : ICONE.ok}<span>${dec === "negar" ? "Negado" : "Permitido"} · ${esc(rotulo(ev.ferramenta))}</span>`; mostraPensando(); };
+    b.onclick = () => { vivo.permissao(ev.id, dec); el.className = "resolvido"; el.innerHTML = `${dec === "negar" ? ICONE.erro : ICONE.ok}<span>${dec === "negar" ? t("app.negado") : t("app.permitido")} · ${esc(rotulo(ev.ferramenta))}</span>`; mostraPensando(); };
     linha.append(b);
   };
-  botao("Permitir", "sim", "forte");
-  if (ev.temSempre) botao("Sempre nesta sessão", "sempre");
-  botao("Negar", "negar");
+  botao(t("app.permitir"), "sim", "forte");
+  if (ev.temSempre) botao(t("app.sempreSessao"), "sempre");
+  botao(t("app.negar"), "negar");
   el.append(linha); forcaDesce();
 }
 
@@ -205,9 +205,9 @@ vivo.aoEvento((ev) => {
     case "marca": { const el = segmento || [...col.querySelectorAll(".msg.claude:not([data-uuid])")].pop(); if (el) el.dataset.uuid = ev.uuid; break; }
     case "uso": mostraUso(ev); break;
     case "ferramenta_fim": ferramentaFim(ev.id, ev.erro, ev.saida); break;
-    case "permissao": permissao(ev); window.somEvento?.("permissao"); avisaSistema("O Claude precisa da sua aprovação", `Quer ${pedido(ev.ferramenta)}.`); break;
+    case "permissao": permissao(ev); window.somEvento?.("permissao"); avisaSistema(t("app.precisaAprovacao"), t("app.quer", { pedido: pedido(ev.ferramenta) })); break;
     case "permissao_fim": document.querySelector(`.perm[data-id="${ev.id}"], .pergunta[data-id="${ev.id}"]`)?.remove(); break;
-    case "apagada": if (sessaoAtual === ev.id) { novaConversa(); nota("Esta conversa foi apagada em outra janela."); } break;
+    case "apagada": if (sessaoAtual === ev.id) { novaConversa(); nota(t("app.apagadaOutraJanela")); } break;
     case "config": $("modo").value = ev.modo || "default"; $("modelo").value = ev.model || ""; $("esforco").value = ev.esforco || ""; atualizaEscolhas(); break;
     case "visual": if (typeof VIS !== "undefined") { VIS = ev.visual || {}; aplicaVisual(); } break;
     case "cartao_tema": { fechaSegmento(); tiraPensando(); const i = idx(ev.tema); if (i >= 0) cartao(bloco("msg claude"), i); break; }
@@ -216,13 +216,13 @@ vivo.aoEvento((ev) => {
     case "aplicar_arte": aplicaChave(ev.chave); break;
     case "sessao": sessaoAtual = ev.id; marcaSessao(); break;
     case "info": break;
-    case "fim": if (!ev.ok && ev.detalhe !== "success") aviso(`Parou: ${ev.detalhe}`, true); break;
+    case "fim": if (!ev.ok && ev.detalhe !== "success") aviso(t("app.parou", { detalhe: ev.detalhe }), true); break;
     case "erro": tiraPensando(); aviso(ev.texto, true); window.somEvento?.("erro"); break;
     case "atualizacao": mostraAtualizacao(ev); break;
     case "parado":
       tiraPensando(); fechaSegmento(); setRodando(false); carregaSessoes();
       if (fila.length) setTimeout(proximaDaFila, 350);
-      else { avisaSistema("O Claude terminou", $("titulo").textContent); window.somEvento?.("terminou"); }
+      else { avisaSistema(t("app.terminou"), $("titulo").textContent); window.somEvento?.("terminou"); }
       break;
   }
 });
@@ -230,7 +230,7 @@ vivo.aoEvento((ev) => {
 function setRodando(v) {
   rodando = v;
   const b = $("enviar");
-  b.classList.toggle("parar", v); b.title = v ? "Parar" : "Enviar (Enter)";
+  b.classList.toggle("parar", v); b.title = v ? t("app.parar") : t("app.enviarEnter");
   atualizaEnviar();
 }
 // Pasted text kept as a chip goes out appended to the message.
@@ -245,13 +245,14 @@ const geral = () => (typeof visualAtual === "function" ? visualAtual().geral || 
 const atualizaEnviar = () => { $("enviar").disabled = !rodando && !entrada.value.trim() && !anexos.length; };
 
 async function envia(textoForcado) {
-  const t = (textoForcado ?? entrada.value).trim(), junto = textoForcado == null ? anexos : [];
+  let t = (textoForcado ?? entrada.value).trim(), junto = textoForcado == null ? anexos : [];
   if (!t && !junto.length) return;
   const limpa = () => { entrada.value = ""; ajustaAltura(); fechaComandos(); atualizaEnviar(); $("composer").classList.remove("modo-comando"); };
+  t = t.replace(/^\/(\S+)/, (m, c) => (Object.hasOwn(ALIAS, c.toLowerCase()) ? "/" + ALIAS[c.toLowerCase()] : m));
   if (t === "/tema") { abrePicker("claudinho"); limpa(); return; }
   if (t.startsWith("/tema ")) {
     const pedido = t.slice(6).trim().toLowerCase(), i = THEMES.findIndex((x) => x.id === pedido || x.name.toLowerCase() === pedido);
-    if (["padrao", "padrão", "off"].includes(pedido)) aplica(-1); else if (i >= 0) aplica(i); else abrePicker("claudinho");
+    if (["padrao", "padrão", "off", "predeterminado", "default"].includes(pedido)) aplica(-1); else if (i >= 0) aplica(i); else abrePicker("claudinho");
     limpa(); return;
   }
   if (t === "/fundo" || t.startsWith("/fundo ")) { abrePicker("biblioteca", t.slice(6).trim()); limpa(); return; }
@@ -273,7 +274,7 @@ async function envia(textoForcado) {
   if (!(await vivo.enviar(final, enviados))) {
     setRodando(false); bolha?.remove();
     if (textoForcado == null) { entrada.value = t; ajustaAltura(); if (eram) { anexos = eram; desenhaAnexos(); } }
-    atualizaEnviar(); nota("Não deu pra enviar agora.", true);
+    atualizaEnviar(); nota(globalThis.t("app.naoEnviou"), true);
   }
 }
 entrada.addEventListener("keydown", (e) => {
@@ -295,16 +296,18 @@ entrada.addEventListener("input", () => { ajustaAltura(); atualizaEnviar(); cmdS
 // Enter runs.
 const comandosEl = $("comandos");
 const LOCAIS = [
-  { nome: "tema", dica: "[nome]", descricao: "Escolher um tema do Claudinho" },
-  { nome: "fundo", dica: "[busca]", descricao: "Procurar um fundo na biblioteca ASCII Magic" },
-  { nome: "importar", descricao: "Importar uma animação feita no ASCII Motion" },
-  { nome: "personalizar", descricao: "Fundos, cores, fontes, sons, música, ícone e nome" },
-  { nome: "nova", descricao: "Começar uma conversa nova" },
+  { nome: t("app.cmdTema"), dica: t("app.dicaNome"), descricao: t("app.cmdTemaDesc") },
+  { nome: t("app.cmdFundo"), dica: t("app.dicaBusca"), descricao: t("app.cmdFundoDesc") },
+  { nome: t("app.cmdImportar"), descricao: t("app.cmdImportarDesc") },
+  { nome: t("app.cmdPersonalizar"), descricao: t("app.cmdPersonalizarDesc") },
+  { nome: t("app.cmdNova"), descricao: t("app.cmdNovaDesc") },
 ].map((c) => ({ ...c, local: true }));
+// the commands also answer to their names in the other languages; the original ones always work
+const ALIAS = { theme: "tema", fondo: "fundo", background: "fundo", import: "importar", customize: "personalizar", nueva: "nova", new: "nova" };
 let todosComandos = null, buscandoComandos = null, cmdVis = [], cmdSel = 0;
 function carregaComandos() {
   buscandoComandos ??= vivo.comandos().then((l) => {
-    todosComandos = [...LOCAIS, ...(l || []).filter((c) => !c.nome.startsWith("_") && !LOCAIS.some((x) => x.nome === c.nome))];
+    todosComandos = [...LOCAIS, ...(l || []).filter((c) => !c.nome.startsWith("_") && !LOCAIS.some((x) => x.nome === c.nome) && !Object.hasOwn(ALIAS, c.nome))];
     if (comandosEl.classList.contains("on")) mostraComandos();
   }).catch(() => { todosComandos = LOCAIS; });
 }
@@ -318,7 +321,7 @@ function mostraComandos() {
   if (!cmdVis.length) return fechaComandos();
   cmdSel = Math.min(cmdSel, cmdVis.length - 1);
   comandosEl.innerHTML = cmdVis.map((c, i) => `<div class="cmd${i === cmdSel ? " on" : ""}" data-i="${i}" role="option"><b>/${esc(c.nome)}</b>${c.dica ? `<i>${esc(c.dica)}</i>` : ""}<span>${esc(c.descricao)}</span></div>`).join("")
-    + (todosComandos ? "" : '<div class="cmd-espera">Carregando os comandos do Claude Code…</div>');
+    + (todosComandos ? "" : `<div class="cmd-espera">${t("app.carregandoComandos")}</div>`);
   comandosEl.classList.add("on"); fechaPicker();
   comandosEl.querySelector(".cmd.on")?.scrollIntoView({ block: "nearest" });
 }
@@ -346,8 +349,8 @@ function desenhaAnexos() {
     d.className = "anexo" + (a.url ? " img" : ""); d.title = a.caminho || a.nome;
     if (a.url) { const img = document.createElement("img"); img.src = a.url; img.alt = a.nome; d.append(img); }
     else { d.innerHTML = a.tipo === "texto" ? ICONE.editar : ICONE.arquivo; const n = document.createElement("span"); n.textContent = a.nome; d.append(n); }
-    if (a.tipo === "texto") { d.classList.add("colado"); d.title = "Clique para ver e editar"; d.onclick = (e) => { if (!e.target.closest(".tira")) editaColado(a); }; }
-    const x = document.createElement("button"); x.className = "tira"; x.title = "Remover"; x.innerHTML = ICONE.erro;
+    if (a.tipo === "texto") { d.classList.add("colado"); d.title = t("app.cliqueEditar"); d.onclick = (e) => { if (!e.target.closest(".tira")) editaColado(a); }; }
+    const x = document.createElement("button"); x.className = "tira"; x.title = t("app.remover"); x.innerHTML = ICONE.erro;
     x.onclick = () => { anexos.splice(i, 1); desenhaAnexos(); };
     d.append(x); anexosEl.append(d);
   });
@@ -362,10 +365,10 @@ async function anexaArquivos(lista) {
   for (const f of lista) {
     const caminho = vivo.caminhoDe ? vivo.caminhoDe(f) : "";
     if (caminho) { anexaCaminho(caminho); continue; }
-    if (!/^image\/(png|jpeg|gif|webp)$/.test(f.type)) { nota(`${f.name || "Esse arquivo"}: só dá pra anexar arquivos do disco ou imagens coladas.`); continue; }
-    if (f.size > 5 * 1024 * 1024) { nota("Imagem grande demais (máx. 5 MB)."); continue; }
+    if (!/^image\/(png|jpeg|gif|webp)$/.test(f.type)) { nota(t("app.soAnexa", { nome: f.name || t("app.esseArquivo") })); continue; }
+    if (f.size > 5 * 1024 * 1024) { nota(t("app.imagemGrande")); continue; }
     const dados = await new Promise((r) => { const fr = new FileReader(); fr.onload = () => r(String(fr.result).split(",")[1]); fr.readAsDataURL(f); });
-    anexos.push({ nome: f.name || "imagem colada.png", dados, mime: f.type, url: URL.createObjectURL(f) });
+    anexos.push({ nome: f.name || t("app.imagemColada"), dados, mime: f.type, url: URL.createObjectURL(f) });
   }
   desenhaAnexos(); entrada.focus();
 }
@@ -381,8 +384,8 @@ const paraFundo = (f) => naAbaMeus() && /\.(png|jpe?g|webp|gif|avif|mp4|webm|mov
 addEventListener("dragenter", (e) => {
   if (!temArquivos(e)) return;
   e.preventDefault(); arrastos++;
-  $("soltar").querySelector("b").textContent = naAbaMeus() ? "Solte para virar fundo" : "Solte para anexar";
-  $("soltar").querySelector("span").textContent = naAbaMeus() ? "Imagem, GIF, vídeo ou o .json do ASCII Motion." : "Imagens vão direto pro Claude; outros arquivos ele abre pelo caminho.";
+  $("soltar").querySelector("b").textContent = naAbaMeus() ? t("app.solteFundo") : t("app.solteAnexar");
+  $("soltar").querySelector("span").textContent = naAbaMeus() ? t("app.solteFundoDica") : t("app.solteAnexarDica");
   document.body.classList.add("arrastando");
 });
 addEventListener("dragover", (e) => { if (temArquivos(e)) e.preventDefault(); });
@@ -417,12 +420,12 @@ function mostraAtualizacao(a) {
   window.desenhaAtualizacaoPz?.(a);
   cartaoAtualiza.hidden = a.estado !== "pronta";
   if (cartaoAtualiza.hidden) return;
-  cartaoAtualiza.innerHTML = `<span class="atualiza-faisca">✻</span><span class="atualiza-txt"><b>Versão ${esc(a.nova)} pronta</b><small>Entra quando o app reiniciar</small></span><button>Reiniciar</button>`;
+  cartaoAtualiza.innerHTML = `<span class="atualiza-faisca">✻</span><span class="atualiza-txt"><b>${t("app.versaoPronta", { versao: esc(a.nova) })}</b><small>${t("app.entraAoReiniciar")}</small></span><button>${t("app.reiniciar")}</button>`;
   cartaoAtualiza.querySelector("button").onclick = instalaAtualizacao;
-  if (atualizaAvisada !== a.nova) { atualizaAvisada = a.nova; dispatchEvent(new CustomEvent("clawd-diz", { detail: { texto: "saiu versão nova de mim!", ms: 4500 } })); }
+  if (atualizaAvisada !== a.nova) { atualizaAvisada = a.nova; dispatchEvent(new CustomEvent("clawd-diz", { detail: { texto: t("app.clawdVersaoNova"), ms: 4500 } })); }
 }
 window.instalaAtualizacao = function instalaAtualizacao() {
-  if (rodando) return nota("Espere o Claude terminar e reinicie: a atualização entra na hora.");
+  if (rodando) return nota(t("app.espereReiniciar"));
   vivo.atualizacaoInstalar();
 };
 vivo.atualizacao().then(mostraAtualizacao);
@@ -433,23 +436,23 @@ col.addEventListener("click", (e) => { const a = e.target.closest("a[href]"); if
 // The welcome screen: centred in the conversation area. Clawd, the greeting,
 // the project it is about (click to switch), four starting points and the keys.
 const SUGESTOES = [
-  ["Me explica a estrutura deste projeto", "Explicar o projeto", "Visão geral das pastas e do que cada parte faz", '<path d="M6.5 3.5h7l4 4v13h-11z"/><path d="M13.5 3.5v4h4M9 12h6M9 15.5h6"/>'],
-  ["Procura bugs ou problemas no código deste projeto", "Procurar bugs", "Uma revisão atrás do que pode quebrar", '<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/>'],
-  ["Escreve testes para as partes mais importantes deste projeto", "Escrever testes", "Cobrir o que mais importa primeiro", '<path d="M9 3.5v6L4.5 18a2 2 0 0 0 1.8 2.8h11.4A2 2 0 0 0 19.5 18L15 9.5v-6M7.5 3.5h9M7 14.5h10"/>'],
-  ["/tema", "Escolher um tema", "Um fundo vivo pro chat, com música", '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>'],
+  [t("app.sugProjetoPedido"), t("app.sugProjeto"), t("app.sugProjetoDesc"), '<path d="M6.5 3.5h7l4 4v13h-11z"/><path d="M13.5 3.5v4h4M9 12h6M9 15.5h6"/>'],
+  [t("app.sugBugsPedido"), t("app.sugBugs"), t("app.sugBugsDesc"), '<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/>'],
+  [t("app.sugTestesPedido"), t("app.sugTestes"), t("app.sugTestesDesc"), '<path d="M9 3.5v6L4.5 18a2 2 0 0 0 1.8 2.8h11.4A2 2 0 0 0 19.5 18L15 9.5v-6M7.5 3.5h9M7 14.5h10"/>'],
+  ["/tema", t("app.sugTema"), t("app.sugTemaDesc"), '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>'],
 ];
 function telaInicial() {
-  const h = new Date().getHours(), oi = h < 5 ? "Boa madrugada" : h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+  const h = new Date().getHours(), oi = h < 5 ? t("app.boaMadrugada") : h < 12 ? t("app.bomDia") : h < 18 ? t("app.boaTarde") : t("app.boaNoite");
   const pasta = esc($("pastaNome").textContent), n = (typeof sessoes !== "undefined" ? sessoes : []).filter((x) => x.cwd === $("pasta").title).length;
   const enviar = geral().enviar === "ctrl" ? "<kbd>Ctrl</kbd> + <kbd>Enter</kbd>" : "<kbd>Enter</kbd>";
   col.innerHTML = `<div class="boas"><div class="boas-cartao">
-      <canvas class="clawd-grande" title="Clawd: clique nele"></canvas>
-      <div class="grande">${oi}. No que vamos trabalhar?</div>
-      <p class="boas-sub">Peça qualquer coisa ao Claude Code, ou um tema novo pro chat.</p>
-      <div class="boas-info"><button class="boas-pasta" title="Trocar a pasta do projeto">${svg('<path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2.5h7a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/>')}<span>${pasta}</span></button><span>${n ? `${n} conversa${n > 1 ? "s" : ""} aqui` : "primeira conversa aqui"}</span></div>
+      <canvas class="clawd-grande" title="${t("app.clawdClique")}"></canvas>
+      <div class="grande">${t("app.saudacao", { oi })}</div>
+      <p class="boas-sub">${t("app.boasSub")}</p>
+      <div class="boas-info"><button class="boas-pasta" title="${t("app.trocarPasta")}">${svg('<path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2.5h7a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/>')}<span>${pasta}</span></button><span>${n ? t("app.conversasAqui", { n }) : t("app.primeiraConversa")}</span></div>
     </div>
     <div class="sugestoes grade">${SUGESTOES.map(([p, t, d, ic]) => `<button data-p="${esc(p)}">${svg(ic)}<span><b>${t}</b><small>${d}</small></span></button>`).join("")}</div>
-    <p class="boas-dica">${enviar} envia · <kbd>/</kbd> comandos · <kbd>Ctrl</kbd> + <kbd>K</kbd> busca</p>
+    <p class="boas-dica">${t("app.boasDica", { enviar })}</p>
   </div>`;
   col.querySelectorAll(".sugestoes button").forEach((b) => (b.onclick = () => envia(b.dataset.p)));
   col.querySelector(".boas-pasta").onclick = () => $("pasta").click();
@@ -462,7 +465,7 @@ function marcaSessao() { lista.querySelectorAll(".item").forEach((d) => d.classL
 function grupoDe(ms) {
   const d = new Date(ms), h = new Date(); h.setHours(0, 0, 0, 0);
   const dias = (h - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 864e5;
-  return dias <= 0 ? "Hoje" : dias === 1 ? "Ontem" : dias < 7 ? "Últimos 7 dias" : dias < 30 ? "Últimos 30 dias" : "Mais antigas";
+  return dias <= 0 ? t("app.hoje") : dias === 1 ? t("app.ontem") : dias < 7 ? t("app.ultimos7") : dias < 30 ? t("app.ultimos30") : t("app.maisAntigas");
 }
 // Pinned conversations stay on top; the search looks at titles and, from two
 // letters on, inside the messages too (with the matching bit shown).
@@ -487,9 +490,9 @@ function cabecalho(nome, n, dobravel) {
 }
 function itemLista(s, filtro) {
   const d = document.createElement("div"), trecho = filtro && !s.titulo.toLowerCase().includes(filtro) ? achados.get(s.id) : null, cor = coresConversa[s.id];
-  d.className = "item" + (fixadas.has(s.id) ? " fixa" : "") + (trecho ? " com-trecho" : ""); d.dataset.id = s.id; d.title = new Date(s.quando).toLocaleString("pt-BR");
+  d.className = "item" + (fixadas.has(s.id) ? " fixa" : "") + (trecho ? " com-trecho" : ""); d.dataset.id = s.id; d.title = new Date(s.quando).toLocaleString(idiomaAtual());
   if (cor) d.style.setProperty("--cor", cor);
-  d.innerHTML = `${cor ? '<i class="ponto"></i>' : ""}<span>${esc(s.titulo)}</span>${todasPastas && filtro && s.projeto ? `<em class="proj" title="${esc(s.cwd)}">${esc(s.projeto)}</em>` : ""}${trecho ? `<small>${esc(trecho)}</small>` : ""}<button class="icone mais" title="Opções">${ICONE.mais}</button>`;
+  d.innerHTML = `${cor ? '<i class="ponto"></i>' : ""}<span>${esc(s.titulo)}</span>${todasPastas && filtro && s.projeto ? `<em class="proj" title="${esc(s.cwd)}">${esc(s.projeto)}</em>` : ""}${trecho ? `<small>${esc(trecho)}</small>` : ""}<button class="icone mais" title="${t("app.opcoes")}">${ICONE.mais}</button>`;
   d.onclick = (e) => { if (!e.target.closest(".mais")) abreSessao(s.id, s.titulo); };
   d.querySelector(".mais").onclick = (e) => { e.stopPropagation(); menuSessao(e.currentTarget, s); };
   d.draggable = true;
@@ -501,10 +504,10 @@ function desenhaLista() {
   const filtro = $("busca").value.trim().toLowerCase();
   const vis = sessoes.filter((s) => !filtro || s.titulo.toLowerCase().includes(filtro) || (s.projeto || "").toLowerCase().includes(filtro) || achados.has(s.id));
   lista.innerHTML = "";
-  if (!vis.length) { lista.innerHTML = `<div class="vazio-lista">${filtro ? (buscaPendente ? "Procurando nas conversas…" : "Nada encontrado.") : "Nenhuma conversa nesta pasta ainda."}</div>`; return; }
+  if (!vis.length) { lista.innerHTML = `<div class="vazio-lista">${filtro ? (buscaPendente ? t("app.procurandoConversas") : t("app.nadaEncontrado")) : t("app.nenhumaConversa")}</div>`; return; }
   const usadas = new Set();
   const fix = vis.filter((s) => fixadas.has(s.id));
-  if (fix.length) { cabecalho("Fixadas", fix.length, false); fix.forEach((s) => { usadas.add(s.id); itemLista(s, filtro); }); }
+  if (fix.length) { cabecalho(t("app.fixadas"), fix.length, false); fix.forEach((s) => { usadas.add(s.id); itemLista(s, filtro); }); }
   for (const g of Object.keys(grupos)) {
     const deles = vis.filter((s) => grupos[g].includes(s.id) && !usadas.has(s.id));
     if (!deles.length && filtro) continue;
@@ -521,7 +524,7 @@ function desenhaLista() {
   const resto = vis.filter((s) => !usadas.has(s.id));
   if (todasPastas && !filtro) {
     const porProjeto = new Map();
-    for (const s of resto) { const p = s.projeto || "Sem pasta"; (porProjeto.get(p) || porProjeto.set(p, []).get(p)).push(s); }
+    for (const s of resto) { const p = s.projeto || t("app.semPasta"); (porProjeto.get(p) || porProjeto.set(p, []).get(p)).push(s); }
     for (const [nome, deles] of [...porProjeto].sort((a, b) => b[1][0].quando - a[1][0].quando)) {
       const chave = "p:" + nome;
       const h = document.createElement("button");
@@ -550,7 +553,7 @@ function moveParaGrupo(id, g) {
 // The new group's name is typed right in the list (Electron has no prompt()).
 function novoGrupo(id) {
   const inp = document.createElement("input");
-  inp.className = "grupo-novo"; inp.placeholder = "Nome do grupo e Enter"; inp.maxLength = 40;
+  inp.className = "grupo-novo"; inp.placeholder = t("app.nomeGrupo"); inp.maxLength = 40;
   lista.prepend(inp); inp.focus();
   let feito = false;
   const cria = (ok) => {
@@ -583,7 +586,7 @@ function mostraEscopo() {
   document.body.classList.toggle("todas-pastas", todasPastas);
 }
 document.querySelectorAll(".escopo [data-todas]").forEach((b) => (b.onclick = () => { todasPastas = b.dataset.todas === "1"; guarda("todasPastas", todasPastas); mostraEscopo(); achados = new Map(); carregaSessoes(); }));
-$("sincronizar").onclick = () => { carregaSessoes(); nota("Conversas sincronizadas com o Claude Code."); };
+$("sincronizar").onclick = () => { carregaSessoes(); nota(t("app.sincronizadas")); };
 let timerSync = null;
 vivo.aoEvento((ev) => { if (ev.tipo === "sessoes_mudaram") { clearTimeout(timerSync); timerSync = setTimeout(carregaSessoes, 300); } });
 addEventListener("focus", () => carregaSessoes());
@@ -602,12 +605,12 @@ $("busca").addEventListener("input", () => {
 
 function menuSessao(ancora, s) {
   const r = ancora.getBoundingClientRect();
-  menu.innerHTML = `<button data-a="fixar">${ICONE.pino}${fixadas.has(s.id) ? "Desafixar" : "Fixar no topo"}</button><button data-a="renomear">${ICONE.lapis}Renomear</button>`
-    + `<button data-a="janela">${ICONE.janela}Abrir em nova janela</button><button data-a="duplicar">${ICONE.duplicar}Duplicar</button><button data-a="exportar">${ICONE.exportar}Exportar (Markdown)</button><button data-a="apagar" class="perigo">${ICONE.lixo}Apagar</button>`;
+  menu.innerHTML = `<button data-a="fixar">${ICONE.pino}${fixadas.has(s.id) ? t("app.desafixar") : t("app.fixarTopo")}</button><button data-a="renomear">${ICONE.lapis}${t("app.renomear")}</button>`
+    + `<button data-a="janela">${ICONE.janela}${t("app.abrirJanela")}</button><button data-a="duplicar">${ICONE.duplicar}${t("app.duplicar")}</button><button data-a="exportar">${ICONE.exportar}${t("app.exportar")}</button><button data-a="apagar" class="perigo">${ICONE.lixo}${t("app.apagar")}</button>`;
   const gAtual = grupoDaConversa(s.id);
-  menu.insertAdjacentHTML("beforeend", `<div class="menu-sep"></div><div class="menu-cores">${CORES_CONVERSA.map((c) => `<button class="cor${coresConversa[s.id] === c ? " on" : ""}" data-cor="${c}" style="--cor:${c}" title="Cor"></button>`).join("")}<button class="cor sem" data-cor="" title="Sem cor"></button></div>`
-    + `<div class="menu-sep"></div><div class="menu-rotulo">Grupo</div>${Object.keys(grupos).map((g) => `<button data-grupo="${esc(g)}"${g === gAtual ? ' class="on"' : ""}>${ICONE.pasta}${esc(g)}</button>`).join("")}`
-    + `<button data-a="novoGrupo">${ICONE.mais}Novo grupo…</button>${gAtual ? `<button data-a="semGrupo">${ICONE.erro}Tirar do grupo</button>` : ""}`);
+  menu.insertAdjacentHTML("beforeend", `<div class="menu-sep"></div><div class="menu-cores">${CORES_CONVERSA.map((c) => `<button class="cor${coresConversa[s.id] === c ? " on" : ""}" data-cor="${c}" style="--cor:${c}" title="${t("app.cor")}"></button>`).join("")}<button class="cor sem" data-cor="" title="${t("app.semCor")}"></button></div>`
+    + `<div class="menu-sep"></div><div class="menu-rotulo">${t("app.grupo")}</div>${Object.keys(grupos).map((g) => `<button data-grupo="${esc(g)}"${g === gAtual ? ' class="on"' : ""}>${ICONE.pasta}${esc(g)}</button>`).join("")}`
+    + `<button data-a="novoGrupo">${ICONE.mais}${t("app.novoGrupo")}</button>${gAtual ? `<button data-a="semGrupo">${ICONE.erro}${t("app.tirarGrupo")}</button>` : ""}`);
   menu.style.left = r.left + "px"; menu.style.top = "0px"; menu.classList.add("on");
   menu.style.top = Math.max(8, Math.min(r.bottom + 4, innerHeight - menu.offsetHeight - 8)) + "px";
   menu.querySelectorAll("[data-cor]").forEach((b) => (b.onclick = () => { if (b.dataset.cor) coresConversa[s.id] = b.dataset.cor; else delete coresConversa[s.id]; guarda("coresConversa", coresConversa); fechaMenu(); desenhaLista(); }));
@@ -619,13 +622,13 @@ function menuSessao(ancora, s) {
   menu.querySelector('[data-a="janela"]').onclick = () => { fechaMenu(); vivo.janelaNova(s.id); };
   menu.querySelector('[data-a="duplicar"]').onclick = async () => {
     fechaMenu(); if (rodando) return;
-    const r2 = await vivo.ramificar(s.id, null, `${s.titulo} (cópia)`, s.cwd);
+    const r2 = await vivo.ramificar(s.id, null, `${s.titulo}${t("app.sufixoCopia")}`, s.cwd);
     if (r2) { if (r2.cwd && r2.cwd !== $("pasta").title) { mostraPasta(r2.cwd); todosComandos = buscandoComandos = null; } await abreSessao(r2.id, r2.titulo); carregaSessoes(); }
   };
-  menu.querySelector('[data-a="exportar"]').onclick = async () => { fechaMenu(); const f = await vivo.exportar(s.id, s.titulo, s.cwd); if (f?.erro) nota(`Não deu pra exportar: ${f.erro}`, true); else if (f) nota(`Exportada: ${f}`); };
+  menu.querySelector('[data-a="exportar"]').onclick = async () => { fechaMenu(); const f = await vivo.exportar(s.id, s.titulo, s.cwd); if (f?.erro) nota(t("app.naoExportou", { erro: f.erro }), true); else if (f) nota(t("app.exportada", { arquivo: f })); };
   const apagar = menu.querySelector('[data-a="apagar"]');
   apagar.onclick = async () => {
-    if (!apagar.dataset.certeza) { apagar.dataset.certeza = "1"; apagar.innerHTML = `${ICONE.lixo}Confirmar: apagar`; return; }
+    if (!apagar.dataset.certeza) { apagar.dataset.certeza = "1"; apagar.innerHTML = `${ICONE.lixo}${t("app.confirmarApagar")}`; return; }
     fechaMenu();
     if (await vivo.apagar(s.id, s.cwd)) { if (sessaoAtual === s.id) novaConversa(); carregaSessoes(); }
   };
@@ -663,17 +666,17 @@ async function abreSessao(id, titulo) {
     else if (m.papel === "claude") { const el = bloco("msg claude", `<div class="corpo">${md(m.texto)}</div>`); decora(el); if (m.uuid) el.dataset.uuid = m.uuid; acoesResposta(el, m.texto, ""); window.camadas?.(el); }
     else ferramenta(crypto.randomUUID(), m.nome, m.entrada, "ok");
   }
-  aviso("Conversa retomada: o Claude lembra de tudo acima.");
+  aviso(t("app.retomada"));
   requestAnimationFrame(() => (scroll.scrollTop = scroll.scrollHeight)); marcaSessao();
 }
 async function novaConversa() {
   if (rodando || !(await vivo.nova())) return;
   window.transicaoDither?.();
-  sessaoAtual = null; $("titulo").textContent = "Nova conversa";
+  sessaoAtual = null; $("titulo").textContent = t("app.novaConversa");
   ferramentas.clear(); segmento = null; bufferTexto = ""; tiraPensando(); telaInicial(); marcaSessao(); escondePlano(); $("medidor").hidden = true; entrada.focus();
 }
 $("nova").onclick = novaConversa;
-$("pasta").onclick = async () => { if (rodando) { nota("Espere o Claude terminar para trocar de pasta."); return; } const p = await vivo.pasta(); if (p) { mostraPasta(p); novaConversa(); carregaSessoes(); todosComandos = buscandoComandos = null; } };
+$("pasta").onclick = async () => { if (rodando) { nota(t("app.espereTrocarPasta")); return; } const p = await vivo.pasta(); if (p) { mostraPasta(p); novaConversa(); carregaSessoes(); todosComandos = buscandoComandos = null; } };
 const mostraPasta = (p) => { $("pastaNome").textContent = p.split(/[\\/]/).pop() || p; $("pasta").title = p; const b = col.querySelector(".boas b"); if (b) b.textContent = $("pastaNome").textContent; };
 $("modelo").onchange = () => vivo.config({ model: $("modelo").value });
 $("modo").onchange = () => vivo.config({ modo: $("modo").value });
@@ -684,27 +687,27 @@ $("esforco").onchange = () => vivo.config({ esforco: $("esforco").value });
 // a slider from "padrão" to "máximo". The native selects stay (hidden) as the
 // source of the values.
 const ESCOLHAS = {
-  modo: { titulo: "Permissões", itens: {
-    default: "Pede a sua aprovação antes de editar arquivos ou rodar comandos.",
-    acceptEdits: "Edita arquivos sem perguntar; comandos ainda pedem aprovação.",
-    plan: "Só lê e planeja. Não muda nada até você aprovar o plano.",
-    auto: "Aprova sozinho o que é seguro e pergunta o resto.",
+  modo: { titulo: t("app.permissoes"), itens: {
+    default: t("app.modoDefault"),
+    acceptEdits: t("app.modoAcceptEdits"),
+    plan: t("app.modoPlan"),
+    auto: t("app.modoAuto"),
   } },
-  modelo: { titulo: "Modelo", itens: {
-    "": "O modelo padrão do seu Claude Code.",
-    "claude-opus-5-5": "O mais capaz, para tarefas grandes e difíceis.",
-    "claude-sonnet-5-5": "Rápido e equilibrado, bom para o dia a dia.",
-    "claude-haiku-5-5": "O mais rápido e leve, gasta menos do seu limite.",
+  modelo: { titulo: t("app.modelo"), itens: {
+    "": t("app.modeloPadrao"),
+    "claude-opus-5-5": t("app.modeloOpus"),
+    "claude-sonnet-5-5": t("app.modeloSonnet"),
+    "claude-haiku-5-5": t("app.modeloHaiku"),
     "claude-fable-5-1": "Fable 5.1.",
   } },
 };
 const ESFORCO = [
-  ["", "Padrão", "O modelo decide quanto pensar."],
-  ["low", "Baixo", "Responde rápido e pensa pouco. Gasta menos."],
-  ["medium", "Médio", "Um pouco de raciocínio, ainda ágil."],
-  ["high", "Alto", "Pensa com calma antes de agir."],
-  ["xhigh", "Muito alto", "Para problemas difíceis. Mais lento."],
-  ["max", "Máximo", "Pensa o máximo possível. O mais lento e o que mais gasta."],
+  ["", t("app.padrao"), t("app.esfPadrao")],
+  ["low", t("app.esfBaixo"), t("app.esfBaixoDesc")],
+  ["medium", t("app.esfMedio"), t("app.esfMedioDesc")],
+  ["high", t("app.esfAlto"), t("app.esfAltoDesc")],
+  ["xhigh", t("app.esfMuitoAlto"), t("app.esfMuitoAltoDesc")],
+  ["max", t("app.esfMaximo"), t("app.esfMaximoDesc")],
 ];
 const caixaSelects = document.createElement("div");
 caixaSelects.hidden = true; document.body.append(caixaSelects);
@@ -723,7 +726,7 @@ function montaEscolha(id, desenhaPop, rotulo, iconeDe) {
   pop.className = "escolha-pop"; pop.setAttribute("role", "dialog");
   caixa.append(btn, pop); velho.replaceWith(caixa); caixaSelects.append(sel);
   const escolhe = (v) => { sel.value = v; sel.dispatchEvent(new Event("change")); atualiza(); };
-  const atualiza = () => { btn.innerHTML = `${iconeDe ? iconeDe(sel) : icone}<span>${esc(rotulo(sel))}</span>${seta}`; btn.title = ESCOLHAS[id]?.titulo || "Esforço"; desenhaPop(pop, sel, escolhe); };
+  const atualiza = () => { btn.innerHTML = `${iconeDe ? iconeDe(sel) : icone}<span>${esc(rotulo(sel))}</span>${seta}`; btn.title = ESCOLHAS[id]?.titulo || t("app.esforco"); desenhaPop(pop, sel, escolhe); };
   btn.onclick = (e) => { e.stopPropagation(); abreEscolha(pop); };
   pop.onclick = (e) => e.stopPropagation();
   escolhas.push(atualiza); atualiza();
@@ -754,17 +757,17 @@ let esfVer = null;
 montaEscolha("esforco", (pop, sel, escolhe) => {
   const atual = Math.max(0, ESFORCO.findIndex(([v]) => v === sel.value));
   pop.classList.add("esf");
-  pop.innerHTML = `<div class="esf-cab"><canvas class="esf-clawd"></canvas><div><small>Esforço</small><b class="esf-nome"></b></div><span class="esf-glifo"></span></div>
+  pop.innerHTML = `<div class="esf-cab"><canvas class="esf-clawd"></canvas><div><small>${t("app.esforco")}</small><b class="esf-nome"></b></div><span class="esf-glifo"></span></div>
     <div class="esf-escala"><button class="esf-auto" data-k="0"><span>Auto</span></button><div class="esf-colunas">${ESFORCO.slice(1).map((_, n) => `<button class="esf-col" data-k="${n + 1}" aria-label="${ESFORCO[n + 1][1]}">${Array.from({ length: n + 1 }, () => "<i></i>").join("")}<em>${GLIFO_ESF[n + 1]}</em></button>`).join("")}</div></div>
     <p class="esf-desc"></p>
-    <div class="esf-troca"><span>Rapidez</span><span class="esf-med" data-m="0"></span><span>Profundidade</span><span class="esf-med" data-m="1"></span></div>`;
+    <div class="esf-troca"><span>${t("app.rapidez")}</span><span class="esf-med" data-m="0"></span><span>${t("app.profundidade")}</span><span class="esf-med" data-m="1"></span></div>`;
   const mostra = (k, previa) => {
     pop.querySelector(".esf-nome").textContent = ESFORCO[k][1];
     pop.querySelector(".esf-glifo").textContent = k ? GLIFO_ESF[k] : "";
     pop.querySelector(".esf-desc").textContent = ESFORCO[k][2];
     pop.querySelectorAll(".esf-col").forEach((c) => { const n = +c.dataset.k; c.classList.toggle("acesa", k > 0 && n <= k); c.classList.toggle("sel", n === k); });
     pop.querySelector(".esf-auto").classList.toggle("sel", k === 0);
-    pop.querySelectorAll(".esf-med").forEach((m) => (m.innerHTML = k ? medidor(TROCA[k][+m.dataset.m]) : '<em>o modelo decide</em>'));
+    pop.querySelectorAll(".esf-med").forEach((m) => (m.innerHTML = k ? medidor(TROCA[k][+m.dataset.m]) : `<em>${t("app.modeloDecide")}</em>`));
     pop.classList.toggle("previa", !!previa);
     pop.dataset.nivel = k;
   };
@@ -869,9 +872,9 @@ function mostra(i) {
 // Portuguese category names, which categories fill the window edge to edge,
 // and which built-in ambience plays under each.
 const PECAS = new Map((window.MAGIA?.pecas || []).map((p) => [p[0], { slug: p[0], nome: p[1], cat: p[2], nota: p[3], tags: p[4], quadrada: !!p[7] }]));
-const CAT_PT = { landscapes: "Paisagens", screens: "Telas", "live-data": "Dados ao vivo", explainers: "Explicações", lettering: "Letreiros", solids: "Sólidos 3D", cosmos: "Cosmos",
-  "motion-lab": "Física", weather: "Clima e natureza", animals: "Animais", things: "Objetos", algorithms: "Algoritmos", demoscene: "Demoscene", arcade: "Arcade", frames: "Molduras",
-  occasions: "Datas", cities: "Cidades", mascots: "Mascotes", "empty-states": "Estados vazios", retro: "Retrô", science: "Ciência", music: "Música", food: "Comida", india: "Índia" };
+const CAT_PT = { landscapes: t("app.cat.landscapes"), screens: t("app.cat.screens"), "live-data": t("app.cat.live-data"), explainers: t("app.cat.explainers"), lettering: t("app.cat.lettering"), solids: t("app.cat.solids"), cosmos: t("app.cat.cosmos"),
+  "motion-lab": t("app.cat.motion-lab"), weather: t("app.cat.weather"), animals: t("app.cat.animals"), things: t("app.cat.things"), algorithms: t("app.cat.algorithms"), demoscene: t("app.cat.demoscene"), arcade: t("app.cat.arcade"), frames: t("app.cat.frames"),
+  occasions: t("app.cat.occasions"), cities: t("app.cat.cities"), mascots: t("app.cat.mascots"), "empty-states": t("app.cat.empty-states"), retro: t("app.cat.retro"), science: t("app.cat.science"), music: t("app.cat.music"), food: t("app.cat.food"), india: t("app.cat.india") };
 const COBRE = new Set(["landscapes", "cities", "cosmos", "weather", "demoscene", "algorithms", "motion-lab", "india"]);
 const SOM_CAT = { landscapes: "moonlit", cities: "chuva", cosmos: "galaxia", weather: "chuva", animals: "koi", demoscene: "arcade", arcade: "arcade", retro: "arcade", algorithms: "codigo",
   screens: "codigo", "live-data": "codigo", explainers: "clouds", "motion-lab": "aurora", solids: "aurora", music: "sakura", india: "sakura", food: "lareira", occasions: "fireflies", science: "galaxia" };
@@ -881,17 +884,17 @@ async function infoArte(chave) {
   const k = chave.indexOf(":"), tipo = chave.slice(0, k), id = chave.slice(k + 1);
   if (tipo === "magia") {
     const p = PECAS.get(id); if (!p) return null;
-    return { tipo, slug: id, nome: p.nome, sub: `Biblioteca · ${CAT_PT[p.cat] || p.cat}`, cobre: COBRE.has(p.cat) || p.quadrada, som: SOM_CAT[p.cat] || "clouds", claro: false };
+    return { tipo, slug: id, nome: p.nome, sub: t("app.subBiblioteca", { cat: CAT_PT[p.cat] || p.cat }), cobre: COBRE.has(p.cat) || p.quadrada, som: SOM_CAT[p.cat] || "clouds", claro: false };
   }
   if (tipo === "motion") {
     const anim = motions.get(id) || (await vivo.motionLer(id)); if (!anim) return null;
     motions.set(id, anim);
-    return { tipo, anim, nome: anim.nome, sub: `Sua animação · ${anim.quadros.length} quadros`, som: null, claro: claroHex(anim.fundo) };
+    return { tipo, anim, nome: anim.nome, sub: t("app.subAnimacao", { n: anim.quadros.length }), som: null, claro: claroHex(anim.fundo) };
   }
   if (tipo === "midia") {
     const m = (await fundosPessoais()).find((x) => x.id === id); if (!m) return null;
     const video = VIDEO.test(m.ext), web = m.ext === "web";
-    return { tipo, url: m.url, video, web, nome: m.nome, sub: `Seu fundo · ${web ? "Wallpaper Engine" : video ? "vídeo" : m.ext === "gif" ? "GIF" : "imagem"}`, som: null, claro: false };
+    return { tipo, url: m.url, video, web, nome: m.nome, sub: t("app.subFundo", { tipo: web ? "Wallpaper Engine" : video ? t("app.video") : m.ext === "gif" ? "GIF" : t("app.imagem") }), som: null, claro: false };
   }
   return null;
 }
@@ -942,13 +945,13 @@ function marcaExibida() {
   document.querySelectorAll(".tc, .bc").forEach((el) => el.classList.toggle("on", el.dataset.chave === exibida));
 }
 function marcaAplicada() {
-  document.querySelectorAll(".card .btn.aplicar").forEach((b) => { const on = b.dataset.chave === aplicada; b.classList.toggle("feito", on); b.classList.toggle("forte", !on); b.textContent = on ? "Aplicado" : "Aplicar"; });
+  document.querySelectorAll(".card .btn.aplicar").forEach((b) => { const on = b.dataset.chave === aplicada; b.classList.toggle("feito", on); b.classList.toggle("forte", !on); b.textContent = on ? t("app.aplicado") : t("app.aplicar"); });
 }
 async function aplicaChave(chave) {
   clearTimeout(timerPrevia); banner.classList.remove("on");
-  if (!(await mostraChave(chave))) { nota("Esse fundo não existe mais.", true); return; }
+  if (!(await mostraChave(chave))) { nota(t("app.fundoSumiu"), true); return; }
   aplicada = chave; aplicado = chave.includes(":") ? -1 : idx(chave);
-  $("temaNome").textContent = $("temaNome").title = nomeExibido || "Padrão";
+  $("temaNome").textContent = $("temaNome").title = nomeExibido || t("app.padrao");
   marcaAplicada();
   try { localStorage.setItem("tema", chave); } catch {}
 }
@@ -958,7 +961,7 @@ async function previaChave(chave) {
   if (!(await mostraChave(chave))) return;
   let n = 5;
   const tick = () => {
-    banner.textContent = `Prévia de ${nomeExibido} · ${n}s · clique em Aplicar para manter`; banner.classList.add("on");
+    banner.textContent = t("app.previaBanner", { nome: nomeExibido, n }); banner.classList.add("on");
     if (n-- <= 0) { banner.classList.remove("on"); mostraChave(aplicada); return; }
     timerPrevia = setTimeout(tick, 1000);
   };
@@ -979,12 +982,12 @@ function cartaoBase(el, chave, nome, sub, tela) {
   info.innerHTML = `<b>${esc(nome)}</b><small>${esc(sub)}</small>`;
   const ap = document.createElement("button"), pv = document.createElement("button");
   ap.className = "btn aplicar"; ap.dataset.chave = chave;
-  pv.className = "btn"; pv.textContent = "Prévia";
+  pv.className = "btn"; pv.textContent = t("app.previa");
   ap.onclick = () => { aplicaChave(chave); Som.clique(somExibido); };
   pv.onclick = () => previaChave(chave);
   info.append(ap, pv); c.append(info); el.append(c); marcaAplicada(); desce();
 }
-function cartao(el, i) { cartaoBase(el, THEMES[i].id, THEMES[i].name, "Tema do Claudinho · ASCII ao vivo", mini(i, 216, 136)); }
+function cartao(el, i) { cartaoBase(el, THEMES[i].id, THEMES[i].name, t("app.temaClaudinho"), mini(i, 216, 136)); }
 async function cartaoArte(el, chave) {
   const info = await infoArte(chave);
   if (!info) { el.remove(); return; }
@@ -995,7 +998,7 @@ async function cartaoArte(el, chave) {
 }
 {
   const cards = $("cards"), none = document.createElement("div");
-  none.className = "tc"; none.dataset.chave = ""; none.innerHTML = '<div class="none">∅</div><p>Padrão</p>';
+  none.className = "tc"; none.dataset.chave = ""; none.innerHTML = `<div class="none">∅</div><p>${t("app.padrao")}</p>`;
   none.onclick = () => { aplica(-1); fechaPicker(); };
   cards.append(none);
   THEMES.forEach((th, i) => {
@@ -1032,7 +1035,7 @@ $("bibN").textContent = PECAS.size;
 {
   const conta = {};
   for (const p of PECAS.values()) conta[p.cat] = (conta[p.cat] || 0) + 1;
-  const chips = [["", "Todas", PECAS.size], ...(window.MAGIA?.cats || []).map(([id]) => [id, CAT_PT[id] || id, conta[id] || 0])];
+  const chips = [["", t("app.todas"), PECAS.size], ...(window.MAGIA?.cats || []).map(([id]) => [id, CAT_PT[id] || id, conta[id] || 0])];
   $("bibCats").innerHTML = chips.map(([id, nome, n]) => `<button class="cat${id === "" ? " on" : ""}" data-cat="${id}">${esc(nome)} <small>${n}</small></button>`).join("");
   $("bibCats").onclick = (e) => {
     const b = e.target.closest(".cat"); if (!b) return;
@@ -1049,7 +1052,7 @@ function filtraBib() {
   // Pieces whose name or tags carry the words come first.
   const forte = (p) => termos.filter((t) => t.test(`${p.nome} ${p.tags}`.toLowerCase())).length;
   if (termos.length) resultadosBib.sort((a, b) => forte(b) - forte(a));
-  bibGrade.innerHTML = resultadosBib.length ? "" : '<div class="vazio-grade">Nada encontrado. Os nomes estão em inglês: tente <b>sea</b>, <b>cat</b>, <b>rain</b>, <b>space</b>…</div>';
+  bibGrade.innerHTML = resultadosBib.length ? "" : `<div class="vazio-grade">${t("app.bibVazio")}</div>`;
   bibGrade.scrollTop = 0; mostradosBib = 0; maisBib();
 }
 function maisBib() {
@@ -1078,17 +1081,17 @@ function cartaoBib(p) {
 async function carregaMeus() {
   const [lista, midias] = await Promise.all([vivo.motionLista(), fundosPessoais(true)]), g = $("meusGrade");
   $("meusN").textContent = lista.length + midias.length;
-  g.innerHTML = lista.length || midias.length ? "" : '<div class="vazio-grade">Nada aqui ainda. Adicione uma imagem, um GIF, um vídeo ou uma animação do ASCII Motion.</div>';
+  g.innerHTML = lista.length || midias.length ? "" : `<div class="vazio-grade">${t("app.meusVazio")}</div>`;
   for (const m of midias) {
     const chave = `midia:${m.id}`, d = document.createElement("div"), video = VIDEO.test(m.ext);
     const prev = document.createElement(video ? "video" : "img"), nome = document.createElement("p"), x = document.createElement("button");
     prev.className = "prev"; prev.src = m.ext === "web" ? m.preview || "" : m.url;
     if (video) { prev.muted = true; prev.loop = true; prev.preload = "metadata"; d.onmouseenter = () => prev.play().catch(() => {}); d.onmouseleave = () => prev.pause(); }
     d.className = "bc" + (exibida === chave ? " on" : ""); d.dataset.chave = chave; d.title = m.nome;
-    nome.textContent = m.nome; x.className = "tira"; x.title = "Apagar"; x.innerHTML = ICONE.lixo;
+    nome.textContent = m.nome; x.className = "tira"; x.title = t("app.apagar"); x.innerHTML = ICONE.lixo;
     x.onclick = async (e) => {
       e.stopPropagation();
-      if (!x.dataset.certeza) { x.dataset.certeza = "1"; x.classList.add("certeza"); x.title = "Clique de novo para apagar"; return; }
+      if (!x.dataset.certeza) { x.dataset.certeza = "1"; x.classList.add("certeza"); x.title = t("app.cliqueApagar"); return; }
       if (aplicada === chave) await aplicaChave("");
       await vivo.pessoalApagar("fundos", m.id); carregaMeus();
     };
@@ -1097,11 +1100,11 @@ async function carregaMeus() {
   }
   for (const m of lista) {
     const chave = `motion:${m.id}`, d = document.createElement("div"), cv = document.createElement("canvas"), nome = document.createElement("p"), x = document.createElement("button");
-    d.className = "bc" + (exibida === chave ? " on" : ""); d.dataset.chave = chave; d.title = `${m.nome} · ${m.quadros} quadros`;
-    nome.textContent = m.nome; x.className = "tira"; x.title = "Apagar"; x.innerHTML = ICONE.lixo;
+    d.className = "bc" + (exibida === chave ? " on" : ""); d.dataset.chave = chave; d.title = t("app.nomeQuadros", { nome: m.nome, n: m.quadros });
+    nome.textContent = m.nome; x.className = "tira"; x.title = t("app.apagar"); x.innerHTML = ICONE.lixo;
     x.onclick = async (e) => {
       e.stopPropagation();
-      if (!x.dataset.certeza) { x.dataset.certeza = "1"; x.classList.add("certeza"); x.title = "Clique de novo para apagar"; return; }
+      if (!x.dataset.certeza) { x.dataset.certeza = "1"; x.classList.add("certeza"); x.title = t("app.cliqueApagar"); return; }
       await vivo.motionApagar(m.id); motions.delete(m.id);
       if (aplicada === chave) aplicaChave(""); carregaMeus();
     };
@@ -1115,7 +1118,7 @@ async function importaMotion(caminho) {
   const r = await vivo.motionImportar(caminho || undefined);
   if (!r) return;
   if (r.erro) { nota(r.erro, true); return; }
-  nota(`“${r.nome}” importada · ${r.quadros} quadros`);
+  nota(t("app.importada", { nome: r.nome, n: r.quadros }));
   abrePicker("meus"); await carregaMeus(); aplicaChave(`motion:${r.id}`);
 }
 $("importar").onclick = () => importaMotion();
@@ -1124,7 +1127,7 @@ async function adicionaFundos(caminhos) {
   if (r.erro) nota(r.erro, true);
   if (!r.itens?.length) return;
   abrePicker("meus"); await carregaMeus(); aplicaChave(`midia:${r.itens[r.itens.length - 1].id}`);
-  nota(r.itens.length > 1 ? `${r.itens.length} fundos adicionados` : `“${r.itens[0].nome}” virou o fundo`);
+  nota(r.itens.length > 1 ? t("app.fundosAdicionados", { n: r.itens.length }) : t("app.virouFundo", { nome: r.itens[0].nome }));
 }
 $("addFundo").onclick = () => adicionaFundos();
 picker.addEventListener("click", (e) => { const a = e.target.closest("a[href]"); if (a) { e.preventDefault(); vivo.link(a.href); } });
@@ -1135,7 +1138,7 @@ const somVol = $("somVol"), somPop = $("somPop");
 function mostraSom() {
   document.body.classList.toggle("som-on", Som.ligado);
   $("somChave").setAttribute("aria-checked", Som.ligado ? "true" : "false");
-  $("somDesc").textContent = !Som.ligado ? "Desligado" : !exibida ? "Ligado · escolha um tema" : somExibido ? `Tocando · ${nomeExibido}` : `${nomeExibido} não tem som`;
+  $("somDesc").textContent = !Som.ligado ? t("app.somDesligado") : !exibida ? t("app.somLigado") : somExibido ? t("app.somTocando", { nome: nomeExibido }) : t("app.somSemSom", { nome: nomeExibido });
   $("somPct").textContent = Math.round(+somVol.value * 100) + "%";
 }
 $("somBtn").onclick = (e) => { e.stopPropagation(); somPop.classList.toggle("on"); mostraSom(); };
@@ -1208,20 +1211,20 @@ async function abreCreditos() {
   for (const p of PECAS.values()) (porCat[p.cat] ||= []).push(p.nome);
   const categorias = (window.MAGIA?.cats || []).map(([id]) => `<details><summary>${esc(CAT_PT[id] || id)} <small>${(porCat[id] || []).length}</small></summary><p>${(porCat[id] || []).sort().map(esc).join(" · ")}</p></details>`).join("");
   creditosCaixa.innerHTML = `
-    <div class="cred-topo"><span class="marca">${$("side").querySelector(".marca-svg").outerHTML}<b>Claudinho</b></span><button class="icone" id="fechaCreditos" title="Fechar (Esc)">${ICONE.erro}</button></div>
-    <p class="cred-autor">Feito por ${link("https://luisrobertoportifolio.com", "Luis Roberto")}</p>
-    <section><h3>A ideia</h3>
-      <p>Inspirado no conceito <i>“theme for Claude Code but every wallpaper is alive”</i>, de Marko Vineli, ${link("https://x.com/handsher_NGU/status/2115618341675319417", "visto no X")}. O Claudinho conversa com o Claude Code pelo SDK oficial de agentes da Anthropic.</p></section>
-    <section><h3>Temas animados <small>${THEMES.length}</small></h3>
+    <div class="cred-topo"><span class="marca">${$("side").querySelector(".marca-svg").outerHTML}<b>Claudinho</b></span><button class="icone" id="fechaCreditos" title="${t("app.fechar")}">${ICONE.erro}</button></div>
+    <p class="cred-autor">${t("app.credFeitoPor", { autor: link("https://luisrobertoportifolio.com", "Luis Roberto") })}</p>
+    <section><h3>${t("app.credIdeiaTitulo")}</h3>
+      <p>${t("app.credIdeia", { link: link("https://x.com/handsher_NGU/status/2115618341675319417", t("app.credVistoNoX")) })}</p></section>
+    <section><h3>${t("app.credTemas")} <small>${THEMES.length}</small></h3>
       <p>${THEMES.map((t) => esc(t.name)).join(" · ")}</p>
-      <p class="fraco">Desenhados para o Claudinho: motor de mosaico ASCII, interações e música gerada no próprio app. A Honu Lagoon e os temas de água seguem a linguagem visual do vídeo de Marko Vineli. A Galáxia Distante é arte original, sem marcas de terceiros.</p></section>
-    <section><h3>Biblioteca ASCII Magic <small>${PECAS.size}</small></h3>
-      <p>Animações de ${link("https://www.ascii-magic.com/ascii", "ASCII Magic")} (© 2026 ASCII Magic), licença MIT. <b>Ocean Sunset</b> é baseada numa foto de César Couto e <b>Starry Ridge</b> numa foto de Vincentiu Solomon, ambas sob a ${link("https://unsplash.com/license", "Licença Unsplash")}.</p>
+      <p class="fraco">${t("app.credTemasTexto")}</p></section>
+    <section><h3>${t("app.credBiblioteca")} <small>${PECAS.size}</small></h3>
+      <p>${t("app.credMagia", { magia: link("https://www.ascii-magic.com/ascii", "ASCII Magic"), unsplash: link("https://unsplash.com/license", t("app.credLicencaUnsplash")) })}</p>
       ${categorias}</section>
-    <section><h3>Suas animações <small>${meus.length}</small></h3>
-      <p>${meus.length ? meus.map((m) => esc(m.nome)).join(" · ") + ". " : "Nenhuma ainda. "}Feitas por você no ${link("https://www.ascii-motion.com", "ASCII Motion")}, editor de animações ASCII de Cameron Foxly (código aberto, MIT).</p></section>
-    <section><h3>Por baixo</h3>
-      <p>${link("https://github.com/anthropics/claude-agent-sdk-typescript", "Claude Agent SDK")} (Anthropic) · ${link("https://www.electronjs.org", "Electron")} (MIT) · ${link("https://marked.js.org", "marked")} (MIT) · ${link("https://zod.dev", "Zod")} (MIT) · fontes ${link("https://rsms.me/inter/", "Inter")} e ${link("https://vercel.com/font", "Geist Mono")} (SIL Open Font License).</p></section>`;
+    <section><h3>${t("app.credSuas")} <small>${meus.length}</small></h3>
+      <p>${meus.length ? meus.map((m) => esc(m.nome)).join(" · ") + ". " : t("app.credNenhuma")}${t("app.credMotion", { motion: link("https://www.ascii-motion.com", "ASCII Motion") })}</p></section>
+    <section><h3>${t("app.credPorBaixo")}</h3>
+      <p>${link("https://github.com/anthropics/claude-agent-sdk-typescript", "Claude Agent SDK")} (Anthropic) · ${link("https://www.electronjs.org", "Electron")} (MIT) · ${link("https://marked.js.org", "marked")} (MIT) · ${link("https://zod.dev", "Zod")} (MIT) · ${t("app.credFontes", { inter: link("https://rsms.me/inter/", "Inter"), geist: link("https://vercel.com/font", "Geist Mono") })} (SIL Open Font License).</p></section>`;
   creditosCaixa.querySelector("#fechaCreditos").onclick = fechaCreditos;
   creditos.classList.add("on");
 }
@@ -1238,7 +1241,7 @@ creditos.addEventListener("click", (e) => {
 const fila = [];
 function desenhaFila() {
   const el = $("fila");
-  el.innerHTML = fila.map((f, i) => `<div class="na-fila"><span class="rot">Na fila</span><span class="txt">${esc(f.t || f.junto.map((x) => x.nome).join(", "))}</span><button class="icone" data-i="${i}" title="Tirar da fila">${ICONE.erro}</button></div>`).join("");
+  el.innerHTML = fila.map((f, i) => `<div class="na-fila"><span class="rot">${t("app.naFila")}</span><span class="txt">${esc(f.t || f.junto.map((x) => x.nome).join(", "))}</span><button class="icone" data-i="${i}" title="${t("app.tirarFila")}">${ICONE.erro}</button></div>`).join("");
   el.querySelectorAll("button").forEach((b) => (b.onclick = () => { fila.splice(+b.dataset.i, 1); desenhaFila(); }));
 }
 async function proximaDaFila() {
@@ -1257,7 +1260,7 @@ async function proximaDaFila() {
 function mostraPlano(todos) {
   if (!Array.isArray(todos) || !todos.length) return escondePlano();
   const feitas = todos.filter((t) => t.status === "completed").length, el = $("plano");
-  el.innerHTML = `<button class="plano-topo" title="Mostrar ou esconder"><b>Plano</b><span class="plano-barra"><i style="width:${(feitas / todos.length) * 100}%"></i></span><small>${feitas}/${todos.length}</small></button>`
+  el.innerHTML = `<button class="plano-topo" title="${t("app.mostrarEsconder")}"><b>${t("app.plano")}</b><span class="plano-barra"><i style="width:${(feitas / todos.length) * 100}%"></i></span><small>${feitas}/${todos.length}</small></button>`
     + `<ol>${todos.map((t) => `<li class="${["pending", "in_progress", "completed"].includes(t.status) ? t.status : ""}">${esc(t.status === "in_progress" && t.activeForm ? t.activeForm : t.content)}</li>`).join("")}</ol>`;
   el.querySelector(".plano-topo").onclick = () => el.classList.toggle("fechado");
   el.classList.add("on");
@@ -1266,13 +1269,13 @@ function escondePlano() { $("plano").classList.remove("on"); }
 
 // ---- context meter ---------------------------------------------------------------------
 // How full the conversation's context is after the last turn, and what it wrote.
-const milhar = (n) => (n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(".", ",") + " mil" : String(n));
+const milhar = (n) => (n >= 1000 ? (n / 1000).toLocaleString(idiomaAtual(), { maximumFractionDigits: n >= 10000 ? 0 : 1 }) + t("app.mil") : String(n));
 function mostraUso({ contexto, janela, saida }) {
   const el = $("medidor"), p = Math.min(100, Math.round((contexto / janela) * 100));
   el.hidden = false; el.classList.toggle("alto", p >= 80);
   el.querySelector("b").style.width = p + "%";
   el.querySelector("span").textContent = `${p}%`;
-  el.title = `Contexto: ${milhar(contexto)} de ${milhar(janela)} tokens (${p}%).\nÚltima resposta: ${milhar(saida)} tokens escritos.${p >= 80 ? "\nEstá enchendo: /compact resume a conversa." : ""}`;
+  el.title = t("app.medidor", { usado: milhar(contexto), janela: milhar(janela), p, saida: milhar(saida) }) + (p >= 80 ? t("app.medidorCheio") : "");
 }
 
 // ---- jump between your messages -----------------------------------------------------
@@ -1297,9 +1300,9 @@ function avisaSistema(titulo, corpo) {
 
 // ---- shortcuts ---------------------------------------------------------------------------
 function abreAtalhos() {
-  const A = [["Enter", "Enviar (com o Claude trabalhando, entra na fila)"], ["Shift + Enter", "Nova linha"], ["/", "Comandos do app e do Claude Code"], ["Ctrl + N", "Nova conversa"], ["Ctrl + Shift + N", "Nova janela"], ["Ctrl + K", "Buscar nas conversas"],
-    ["Ctrl + B", "Mostrar ou esconder a barra lateral"], ["Ctrl + J", "Mostrar ou esconder os detalhes"], ["Alt + ↑ / ↓", "Pular entre as suas mensagens"], ["Ctrl + V", "Colar imagem como anexo"], ["Esc", "Fechar menus e painéis"], ["Ctrl + /", "Esta lista"], ["Ctrl + Shift + Espaço", "Mostrar o Claudinho de qualquer lugar"]];
-  creditosCaixa.innerHTML = `<div class="cred-topo"><span class="marca"><b>Atalhos</b></span><button class="icone" id="fechaCreditos" title="Fechar (Esc)">${ICONE.erro}</button></div>
+  const A = [["Enter", t("app.atEnviar")], ["Shift + Enter", t("app.atNovaLinha")], ["/", t("app.atComandos")], ["Ctrl + N", t("app.novaConversa")], ["Ctrl + Shift + N", t("app.atNovaJanela")], ["Ctrl + K", t("app.atBuscar")],
+    ["Ctrl + B", t("app.atBarra")], ["Ctrl + J", t("app.atDetalhes")], ["Alt + ↑ / ↓", t("app.atPular")], ["Ctrl + V", t("app.atColar")], ["Esc", t("app.atFechar")], ["Ctrl + /", t("app.atLista")], ["Ctrl + Shift + " + t("app.teclaEspaco"), t("app.atMostrar")]];
+  creditosCaixa.innerHTML = `<div class="cred-topo"><span class="marca"><b>${t("app.atalhos")}</b></span><button class="icone" id="fechaCreditos" title="${t("app.fechar")}">${ICONE.erro}</button></div>
     <section class="atalhos">${A.map(([k, d]) => `<div><kbd>${esc(k)}</kbd><span>${esc(d)}</span></div>`).join("")}</section>`;
   creditosCaixa.querySelector("#fechaCreditos").onclick = fechaCreditos;
   creditos.classList.add("on");
@@ -1322,7 +1325,7 @@ $("atalhosBtn").onclick = abreAtalhos;
   if (sessao || e.janelas > 1) {
     $("intro").remove(); document.body.classList.remove("entrando");
     await carregaSessoes();
-    if (sessao) await abreSessao(sessao, sessoes.find((x) => x.id === sessao)?.titulo || "Conversa");
+    if (sessao) await abreSessao(sessao, sessoes.find((x) => x.id === sessao)?.titulo || t("app.conversa"));
     entrada.focus();
   } else {
     carregaSessoes();

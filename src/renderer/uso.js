@@ -5,15 +5,15 @@
 // renews. The top-bar button shows the same stamina in four tiles, and the
 // Clawd beside the composer gets tired too.
 
-const NOMES_JANELA = { five_hour: "Sessão de 5 horas", seven_day: "Semana", seven_day_opus: "Semana · Opus", seven_day_sonnet: "Semana · Sonnet", seven_day_oauth_apps: "Semana · apps conectados" };
+const NOMES_JANELA = { five_hour: t("uso.sessao5h"), seven_day: t("uso.semana"), seven_day_opus: t("uso.semanaOpus"), seven_day_sonnet: t("uso.semanaSonnet"), seven_day_oauth_apps: t("uso.semanaApps") };
 let usoDados = null, usoPedido = null;
 const quandoRenova = (iso) => {
   if (!iso) return "";
   const d = new Date(iso), hoje = new Date(), amanha = new Date(Date.now() + 864e5);
-  const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-  if (d.toDateString() === hoje.toDateString()) return `às ${hora}`;
-  if (d.toDateString() === amanha.toDateString()) return `amanhã às ${hora}`;
-  return `${d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" }).replace(".", "")} às ${hora}`;
+  const hora = d.toLocaleTimeString(idiomaAtual(), { hour: "2-digit", minute: "2-digit" });
+  if (d.toDateString() === hoje.toDateString()) return t("uso.as", { hora });
+  if (d.toDateString() === amanha.toDateString()) return t("uso.amanhaAs", { hora });
+  return t("uso.diaAs", { dia: d.toLocaleDateString(idiomaAtual(), { weekday: "short", day: "2-digit", month: "2-digit" }).replace(".", ""), hora });
 };
 const cincoHoras = () => usoDados?.janelas?.find((j) => j.id === "five_hour");
 // 0 fresh … 1 spent; at or over 100 he sleeps
@@ -33,7 +33,7 @@ function mostraUso_() {
   // top-bar: four stamina tiles (how much is left)
   const resta = c == null ? 4 : Math.ceil((1 - c) * 4);
   botaoUso.querySelector(".folego").innerHTML = Array.from({ length: 4 }, (_, k) => `<i class="${k < resta ? "on" : ""}"></i>`).join("");
-  botaoUso.title = c == null ? "Uso do plano" : `Uso do plano: ${Math.round(c * 100)}% da sessão de 5 horas`;
+  botaoUso.title = c == null ? t("uso.usoDoPlano") : t("uso.usoDoPlanoPct", { pct: Math.round(c * 100) });
   if (janelinhas.has("uso")) desenhaJanelaUso();
 }
 
@@ -44,7 +44,7 @@ botaoUso.onclick = abreUso;
 
 ABRE_JANELINHA.uso = () => abreUso();
 function abreUso() {
-  const j = janelinha("uso", "Uso do plano", { largura: 440 });
+  const j = janelinha("uso", t("uso.usoDoPlano"), { largura: 440 });
   if (!j.corpo.querySelector(".academia")) {
     j.corpo.innerHTML = `<canvas class="academia"></canvas><div class="uso-info"></div>`;
     animaAcademia(j.corpo.querySelector(".academia"));
@@ -55,33 +55,33 @@ function abreUso() {
 // "1h 32min" until an ISO time
 function tempoAte(iso) {
   const min = Math.max(0, Math.round((new Date(iso) - Date.now()) / 60000));
-  if (min < 60) return `${min} min`;
+  if (min < 60) return t("uso.min", { min });
   const h = Math.floor(min / 60), m = min % 60;
-  return h < 24 ? `${h}h${m ? ` ${String(m).padStart(2, "0")}min` : ""}` : `${Math.round(h / 24)} dia${h >= 36 ? "s" : ""}`;
+  return h < 24 ? (m ? t("uso.horasMin", { h, m: String(m).padStart(2, "0") }) : t("uso.horas", { h })) : t("uso.dias", { n: Math.round(h / 24) });
 }
 // The session in large type with a live countdown, then the other windows as
 // compact rows. Redrawn every 30s while open, so the countdown keeps going.
 function desenhaJanelaUso() {
   const j = janelinhas.get("uso"); if (!j) return;
   const caixa = j.corpo.querySelector(".uso-info"), d = usoDados;
-  if (!d) { caixa.innerHTML = '<p class="jl-vazio">Lendo o uso do plano…</p>'; return; }
-  if (!d.disponivel) { caixa.innerHTML = '<p class="jl-vazio">O uso do plano não está disponível para este login.</p>'; return; }
+  if (!d) { caixa.innerHTML = `<p class="jl-vazio">${t("uso.lendo")}</p>`; return; }
+  if (!d.disponivel) { caixa.innerHTML = `<p class="jl-vazio">${t("uso.indisponivel")}</p>`; return; }
   const c = cansaco(), cinco = cincoHoras();
-  const estado = c == null ? "" : c >= 1 ? "Dormindo até a sessão renovar." : c >= 0.95 ? "No limite. Mais um pouco e ele apaga." : c >= 0.8 ? "Cansado. Use com calma." : c >= 0.5 ? "Suando, mas firme." : "Em forma.";
+  const estado = c == null ? "" : c >= 1 ? t("uso.dormindo") : c >= 0.95 ? t("uso.noLimite") : c >= 0.8 ? t("uso.cansado") : c >= 0.5 ? t("uso.suando") : t("uso.emForma");
   const tiles = (p) => Array.from({ length: 20 }, (_, k) => `<i class="${k < Math.round(p / 5) ? "on" : ""}" style="--k:${k}"></i>`).join("");
   const pc = cinco?.uso != null ? Math.max(0, Math.min(100, cinco.uso)) : null;
   const topo = pc == null ? "" : `<div class="uso-destaque${pc >= 80 ? " alto" : ""}">
       <div class="uso-num">${Math.round(pc)}<small>%</small></div>
-      <div class="uso-sessao"><b>Sessão de 5 horas</b><span>${cinco.renova ? `renova em ${tempoAte(cinco.renova)} · ${quandoRenova(cinco.renova)}` : ""}</span><p>${estado}</p></div>
+      <div class="uso-sessao"><b>${t("uso.sessao5h")}</b><span>${cinco.renova ? t("uso.renovaEm", { tempo: tempoAte(cinco.renova), quando: quandoRenova(cinco.renova) }) : ""}</span><p>${estado}</p></div>
       ${d.plano ? `<span class="uso-plano">${esc(d.plano[0].toUpperCase() + d.plano.slice(1))}</span>` : ""}
     </div><div class="uso-tiles grande${pc >= 80 ? " alto" : ""}">${tiles(pc)}</div>`;
   const linhas = d.janelas.filter((x) => x.id !== "five_hour" && NOMES_JANELA[x.id] && x.uso != null).map((x) => {
     const p = Math.max(0, Math.min(100, x.uso));
     return `<div class="uso-linha${p >= 80 ? " alto" : ""}"><div class="uso-topo"><b>${NOMES_JANELA[x.id]}</b><span>${Math.round(p)}%</span></div>
-      <div class="uso-tiles">${tiles(p)}</div><small>${x.renova ? `renova em ${tempoAte(x.renova)} · ${quandoRenova(x.renova)}` : ""}</small></div>`;
+      <div class="uso-tiles">${tiles(p)}</div><small>${x.renova ? t("uso.renovaEm", { tempo: tempoAte(x.renova), quando: quandoRenova(x.renova) }) : ""}</small></div>`;
   }).join("");
   caixa.innerHTML = `${topo}${linhas ? `<div class="uso-outras">${linhas}</div>` : ""}
-    <div class="uso-rodape"><span>Atualiza sozinho a cada minuto. Fixe a janela no alfinete para ela ficar sempre aqui.</span><button class="btn" data-a="atualiza">Atualizar</button></div>`;
+    <div class="uso-rodape"><span>${t("uso.rodape")}</span><button class="btn" data-a="atualiza">${t("uso.atualizar")}</button></div>`;
   caixa.querySelector('[data-a="atualiza"]').onclick = atualizaUso;
 }
 setInterval(() => { const j = janelinhas.get("uso"); if (j?.el.classList.contains("on")) { j.corpo.querySelector(".uso-info")?.classList.add("quieto"); desenhaJanelaUso(); } }, 30000);
@@ -104,7 +104,7 @@ function animaAcademia(cv) {
     const chao = H - 22;
     for (let x = 6; x < W - 6; x += 14) { ctx.fillStyle = "rgba(255,255,255,0.06)"; ctx.fillRect(x, chao + 4, 12, 6); }
     // stamina tiles, top left
-    ctx.font = "500 11px Inter, sans-serif"; ctx.fillStyle = "rgba(236,235,231,0.55)"; ctx.fillText("Fôlego", 12, 18);
+    ctx.font = "500 11px Inter, sans-serif"; ctx.fillStyle = "rgba(236,235,231,0.55)"; ctx.fillText(globalThis.t("uso.folego"), 12, 18);
     for (let k = 0; k < 10; k++) { ctx.fillStyle = k < Math.round((1 - c) * 10) ? (c >= 0.8 ? "#e2735f" : cor) : "rgba(255,255,255,0.1)"; ctx.fillRect(58 + k * 11, 10, 9, 9); }
     const cw = CLAWD.W * PW, cx = W / 2 - cw / 2;
     if (dorme) {
@@ -145,4 +145,4 @@ setInterval(() => { if (janelinhas.has("uso") && janelinhas.get("uso").el.classL
 setInterval(atualizaUso, 5 * 60000);
 vivo.aoEvento((ev) => { if (ev.tipo === "parado") setTimeout(atualizaUso, 1500); if (ev.tipo === "limite" && ev.info?.status === "rejected") { usoDados ??= { disponivel: true, janelas: [] }; atualizaUso(); } });
 setTimeout(atualizaUso, 2500);
-ACOES_RADIAL.splice(5, 0, ["Uso", svg('<rect x="3" y="7" width="4" height="10" rx="1"/><rect x="10" y="7" width="4" height="10" rx="1"/><rect x="17" y="7" width="4" height="10" rx="1"/>'), () => abreUso()]);
+ACOES_RADIAL.splice(5, 0, [t("uso.uso"), svg('<rect x="3" y="7" width="4" height="10" rx="1"/><rect x="10" y="7" width="4" height="10" rx="1"/><rect x="17" y="7" width="4" height="10" rx="1"/>'), () => abreUso()]);
