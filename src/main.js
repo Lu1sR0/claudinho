@@ -279,13 +279,22 @@ const arquivoPessoal = (tipo, id) => path.join(pastaPessoal(tipo), path.basename
 // are counted and left out. A web wallpaper is copied whole and runs in a
 // sandboxed frame with no access to the app.
 function bibliotecasSteam() {
+  const win = process.platform === "win32";
   let raiz = "C:\\Program Files (x86)\\Steam";
-  try {
-    const r = execFileSync("reg", ["query", "HKCU\\Software\\Valve\\Steam", "/v", "SteamPath"], { encoding: "utf8", windowsHide: true });
-    const m = /SteamPath\s+REG_SZ\s+(.+)/.exec(r); if (m) raiz = m[1].trim();
-  } catch {}
+  if (win) {
+    try {
+      const r = execFileSync("reg", ["query", "HKCU\\Software\\Valve\\Steam", "/v", "SteamPath"], { encoding: "utf8", windowsHide: true });
+      const m = /SteamPath\s+REG_SZ\s+(.+)/.exec(r); if (m) raiz = m[1].trim();
+    } catch {}
+  } else {
+    // ~/.steam/steam is usually a symlink: resolved, it matches libraryfolders.vdf
+    const achada = [".steam/steam", ".local/share/Steam", ".var/app/com.valvesoftware.Steam/.local/share/Steam"].map((p) => path.join(os.homedir(), p)).find((p) => fs.existsSync(p));
+    if (!achada) return [];
+    raiz = fs.realpathSync(achada);
+  }
   // the registry and libraryfolders.vdf spell the same folder in different case
-  const libs = new Map(), poe = (p) => { const n = path.normalize(p); libs.set(n.toLowerCase(), libs.get(n.toLowerCase()) || n); };
+  const chave = (n) => (win ? n.toLowerCase() : n);
+  const libs = new Map(), poe = (p) => { const n = path.normalize(p); libs.set(chave(n), libs.get(chave(n)) || n); };
   poe(raiz);
   try { for (const m of fs.readFileSync(path.join(raiz, "steamapps", "libraryfolders.vdf"), "utf8").matchAll(/"path"\s+"([^"]+)"/g)) poe(m[1].replace(/\\\\/g, "\\")); } catch {}
   return [...libs.values()];
@@ -891,6 +900,8 @@ app.setAppUserModelId(APP_ID);
 // the canvases, videos and web wallpapers go straight to the GPU
 app.commandLine.appendSwitch("enable-gpu-rasterization");
 app.commandLine.appendSwitch("enable-zero-copy");
+// Wayland only delivers global shortcuts through the desktop portal
+if (process.platform === "linux") app.commandLine.appendSwitch("enable-features", "GlobalShortcutsPortal");
 // Test runs (VIVO_PASTA / VIVO_JS) use a profile of their own, so they never
 // touch the person's settings and can run with the app open.
 if (process.env.VIVO_PASTA || process.env.VIVO_JS) app.setPath("userData", path.join(app.getPath("appData"), process.env.VIVO_PERFIL || "Claudinho-teste"));
@@ -925,10 +936,11 @@ function servePapelWeb() {
 }
 
 // ---- updates ---------------------------------------------------------------------------
-// The installed app looks for a new release on GitHub (latest.yml next to the
-// installer) a little after it opens and every six hours, downloads it in the
-// background and tells the windows. It installs on "Reiniciar agora" or by
-// itself the next time the app closes. Running from the code (npm start) it
+// The installed app looks for a new release on GitHub (latest.yml or
+// latest-linux.yml next to the installer) a little after it opens and every six
+// hours, downloads it in the background and tells the windows. It installs on
+// "Reiniciar agora" or, on Windows, by itself the next time the app closes; a
+// .deb asks for the admin password, which must not pop up on close. Running from the code (npm start) it
 // stays quiet. VIVO_FEED="http://..." points it at a test server instead.
 let atualizacao = { estado: "parado", versao: app.getVersion() };
 const avisaAtualizacao = (mudanca) => {
@@ -940,7 +952,7 @@ let procuraAtualizacao = async () => avisaAtualizacao({ estado: "desligada" });
 function iniciaAtualizacoes() {
   if (!(app.isPackaged || process.env.VIVO_FEED) || (process.env.VIVO_JS && !process.env.VIVO_FEED)) { atualizacao.estado = "desligada"; return; }
   const { autoUpdater } = atualizador;
-  autoUpdater.autoDownload = true; autoUpdater.autoInstallOnAppQuit = !process.env.VIVO_FEED; autoUpdater.logger = null;
+  autoUpdater.autoDownload = true; autoUpdater.autoInstallOnAppQuit = !process.env.VIVO_FEED && process.platform !== "linux"; autoUpdater.logger = null;
   if (process.env.VIVO_FEED) { autoUpdater.forceDevUpdateConfig = true; autoUpdater.setFeedURL({ provider: "generic", url: process.env.VIVO_FEED }); }
   autoUpdater.on("checking-for-update", () => avisaAtualizacao({ estado: "procurando" }));
   autoUpdater.on("update-not-available", () => avisaAtualizacao({ estado: "em_dia", nova: null }));

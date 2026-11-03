@@ -226,7 +226,7 @@ async function desenhaAba() {
       ${chaveT("geral.clawdFala", "Clawd puxa conversa", "Comentários sobre o projeto, curiosidades e dicas, de tempos em tempos")}
       ${chaveT("geral.novidades", "Novidades do Claude e da Anthropic", "Uma busca rápida na web por dia (gasta bem pouco do plano)")}
       ${chaveT("geral.reage", "Papel de parede reage ao Claude", "Ondas e ritmo mudam enquanto ele pensa, trabalha ou espera você")}
-      ${chaveT("geral.notificacoes", "Notificações do Windows", "Quando ele termina ou precisa de você com a janela em segundo plano")}
+      ${chaveT("geral.notificacoes", "Notificações do sistema", "Quando ele termina ou precisa de você com a janela em segundo plano")}
       <h3 class="pz-sub">Atualizações</h3>
       <div class="pz-linha"><span>Claudinho <b class="pz-versao"></b><small class="pz-atualiza-txt"></small></span><button class="btn" data-atualiza hidden></button></div>
       <h3 class="pz-sub">Conta</h3>
@@ -295,7 +295,7 @@ async function desenhaAba() {
         <div class="pz-acoes"><button class="btn forte" data-acao="addIcone">Escolher ícone…</button>${VIS.icone ? '<button class="btn" data-acao="iconePadrao">Usar o padrão</button>' : ""}</div></div>
       ${chaveT("iconeNaBarra", "Mostrar o ícone na barra lateral")}
       <label class="pz-linha"><span>Nome do app</span><input type="text" data-k="nome" maxlength="28" placeholder="Claudinho" /></label>
-      <p class="pz-desc fraco">O atalho "Abrir Claudinho.bat" mantém o ícone do Windows; o ícone novo aparece na barra de tarefas com o app aberto.</p>`;
+      <p class="pz-desc fraco">O atalho do sistema mantém o ícone original; o ícone novo aparece na barra de tarefas com o app aberto.</p>`;
   }
   corpoP.innerHTML = h;
   ligaControles(corpoP);

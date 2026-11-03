@@ -7,8 +7,10 @@ Site: [meuclaudinho.com.br](https://meuclaudinho.com.br) · Feito por [Luis Robe
 ## Instalar
 
 1. Instale o [Claude Code](https://code.claude.com/docs/en/setup) e entre com a sua conta (o Claudinho usa o Claude Code que está no seu computador).
-2. Baixe o instalador em [Releases](../../releases/latest) (`Claudinho-Setup.exe`) e abra. Windows 10 ou 11.
-3. Depois de instalado, o Claudinho se atualiza sozinho: baixa a versão nova em segundo plano e avisa na barra lateral (também em Personalizar → Geral → Atualizações).
+2. Baixe o instalador em [Releases](../../releases/latest):
+   - **Windows 10 ou 11**: `Claudinho-Setup.exe`, e abra.
+   - **Debian 13 ou Ubuntu 24.04+ (x64)**: `Claudinho-amd64.deb`, e rode `sudo apt install ./Claudinho-amd64.deb`.
+3. Depois de instalado, o Claudinho se atualiza sozinho: baixa a versão nova em segundo plano e avisa na barra lateral (também em Personalizar → Geral → Atualizações). No Linux, ela instala quando você clica em **Reiniciar agora**, que pede a senha de administrador.
 4. O instalador não é assinado: se o Windows mostrar "O Windows protegeu o seu computador", clique em **Mais informações → Executar assim mesmo**.
 
 **Como o Claudinho entra no Claude**: por padrão, com o login do próprio Claude Code (o seu plano). Em Personalizar → Geral → Conta dá pra usar uma **chave de API da Anthropic** no lugar (cobrada por uso); a chave fica cifrada pelo sistema.
@@ -18,7 +20,15 @@ Site: [meuclaudinho.com.br](https://meuclaudinho.com.br) · Feito por [Luis Robe
 ```bash
 npm install
 npm start          # abre o app
-npm run dist       # gera o instalador em dist/
+npm run dist       # gera o instalador do Windows em dist/
+npm run dist:deb   # gera o .deb em dist/ (rode no Linux)
+```
+
+No Ubuntu 24.04+, `npm start` aborta com `The SUID sandbox helper binary was found, but is not configured correctly`. Para corrigir:
+
+```bash
+sudo chown root:root node_modules/electron/dist/chrome-sandbox
+sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
 ```
 
 ## Como usar
@@ -53,7 +63,7 @@ npm run dist       # gera o instalador em dist/
   - **Sons**: um som seu para enviar, terminar, pedido de aprovação, erro, clique no papel de parede e abrir o app.
   - **Música**: suas músicas tocando em sequência ou aleatórias, no lugar da música dos temas ou junto (controles também no botão de som).
   - **Ícone e nome**: ícone da janela e da barra de tarefas, opcionalmente na barra lateral, e o nome do app.
-  - Os arquivos ficam copiados em `%APPDATA%\Claudinho\pessoal`; "Restaurar tudo" volta ao padrão.
+  - Os arquivos ficam copiados em `%APPDATA%\Claudinho\pessoal` (Linux: `~/.config/Claudinho/pessoal`); "Restaurar tudo" volta ao padrão.
 - **Uso do plano** (botão de fôlego no topo): o Clawd treina na academia; vai cansando conforme a sessão de 5 horas enche e dorme quando bate o limite, com a hora em que libera. Mostra também a semana e por modelo.
 - **Clawd conversa**: de tempos em tempos ele comenta o projeto, conta curiosidades do Claude e da Anthropic, dá dicas do app e traz novidades (uma busca rápida por dia). Clique nele para ouvir a próxima. Dá pra desligar em Personalizar → Geral.
 - **Créditos**: na barra lateral, quem fez cada arte e cada parte do app.
@@ -75,7 +85,7 @@ npm run dist       # gera o instalador em dist/
 
 - `node tools/teste-sdk.mjs`: uma pergunta curta pelo SDK, para conferir o login e o streaming.
 - `VIVO_LOG=1 VIVO_TESTE="mensagem" npm start`: envia a mensagem ao abrir e registra os eventos no terminal (`VIVO_ANEXO=arquivo` anexa um arquivo).
-- `node`/testes: com `VIVO_PASTA` ou `VIVO_JS` o app usa um perfil separado (`%APPDATA%\Claudinho-teste`), então os testes não mexem nas suas configurações e rodam com o app aberto.
+- `node`/testes: com `VIVO_PASTA` ou `VIVO_JS` o app usa um perfil separado (`%APPDATA%\Claudinho-teste`, no Linux `~/.config/Claudinho-teste`), então os testes não mexem nas suas configurações e rodam com o app aberto.
 - `VIVO_MOTION=arquivo.json`: importa uma animação do ASCII Motion ao abrir. `VIVO_JS="expressão" VIVO_FOTO=tela.png`: roda um código na janela e salva uma foto dela.
 
 ## Licença e créditos
